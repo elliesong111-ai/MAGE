@@ -54,25 +54,35 @@
     <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </nav>
 
-  <!-- Hero Section: Magic opening -->
+  <!-- Hero Section: Tap to begin → burst → logo → content -->
   <header id="hero" class="hero">
+    <div class="hero-tap-overlay" id="heroTapOverlay" role="button" tabindex="0" aria-label="Start">
+      <span class="hero-tap-suits">♠ ♥ ♣ ♦</span>
+      <span class="hero-tap-text">TAP TO BEGIN</span>
+      <span class="hero-tap-sub">the magic</span>
+      <span class="hero-tap-hint">click or tap anywhere</span>
+    </div>
     <div class="hero-bg">
       <div class="hero-vignette" aria-hidden="true"></div>
       <div class="hero-curtain" aria-hidden="true"></div>
       <div class="floating-cards" aria-hidden="true">
-        <span class="card-float c1">♠</span>
-        <span class="card-float c2">♥</span>
-        <span class="card-float c3">♣</span>
-        <span class="card-float c4">♦</span>
-        <span class="card-float c5">♠</span>
-        <span class="card-float c6">♥</span>
-        <span class="card-float c7">♦</span>
-        <span class="card-float c8">♣</span>
+        <span class="card-float c1" data-suit="♠">♠</span>
+        <span class="card-float c2" data-suit="♥">♥</span>
+        <span class="card-float c3" data-suit="♣">♣</span>
+        <span class="card-float c4" data-suit="♦">♦</span>
+        <span class="card-float c5" data-suit="♠">♠</span>
+        <span class="card-float c6" data-suit="♥">♥</span>
+        <span class="card-float c7" data-suit="♦">♦</span>
+        <span class="card-float c8" data-suit="♣">♣</span>
+        <span class="card-float c9" data-suit="♠">♠</span>
+        <span class="card-float c10" data-suit="♥">♥</span>
       </div>
     </div>
     <div class="hero-magic">
       <div class="hero-logo-wrap">
-        <img src="assets/logo-mage.png" alt="MAGE" class="hero-logo" width="200" height="200" onerror="this.src='assets/logo-mage.svg'">
+        <div class="hero-logo-parallax">
+          <img src="assets/logo-mage.png" alt="MAGE" class="hero-logo" width="200" height="200" onerror="this.src='assets/logo-mage.svg'">
+        </div>
       </div>
     </div>
     <div class="hero-content">

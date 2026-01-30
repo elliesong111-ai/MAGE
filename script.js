@@ -26,6 +26,41 @@ document.addEventListener('DOMContentLoaded', () => {
     a.addEventListener('click', () => { nav.classList.remove('open'); });
   });
 
+  // ----- Hero: tap to begin (interactive opening) -----
+  const hero = document.getElementById('hero');
+  const heroTapOverlay = document.getElementById('heroTapOverlay');
+  const heroAudio = new Audio('assets/roll.mp3');
+  function startHero() {
+    if (!hero || hero.classList.contains('hero-started')) return;
+    hero.classList.add('hero-started');
+    try { heroAudio.currentTime = 0; heroAudio.play().catch(() => {}); } catch (e) {}
+    if (window.gtag) gtag('event', 'hero_started');
+  }
+  if (heroTapOverlay) {
+    heroTapOverlay.addEventListener('click', startHero);
+    heroTapOverlay.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startHero(); } });
+  }
+  hero.addEventListener('click', (e) => {
+    if (e.target.closest('.hero-tap-overlay') || e.target.closest('a') || e.target.closest('button')) return;
+    if (hero.classList.contains('hero-started')) return;
+    startHero();
+  });
+
+  // ----- Hero: mouse parallax (logo subtle move with cursor) -----
+  const heroParallax = document.querySelector('.hero-logo-parallax');
+  if (hero && heroParallax) {
+    hero.addEventListener('mousemove', (e) => {
+      if (!hero.classList.contains('hero-started')) return;
+      const rect = hero.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      const dx = Math.round(x * 14);
+      const dy = Math.round(y * 14);
+      heroParallax.style.transform = `translate(${dx}px, ${dy}px)`;
+    });
+    hero.addEventListener('mouseleave', () => { heroParallax.style.transform = ''; });
+  }
+
   // ----- Smooth scroll -----
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
