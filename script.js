@@ -26,27 +26,117 @@ document.addEventListener('DOMContentLoaded', () => {
     a.addEventListener('click', () => { nav.classList.remove('open'); });
   });
 
-  // ----- Hero: tap to begin (interactive opening) -----
+  // ----- Hero: tap to begin (game-style opening) -----
   const hero = document.getElementById('hero');
   const heroTapOverlay = document.getElementById('heroTapOverlay');
+  const heroCursorGlow = document.getElementById('heroCursorGlow');
+  const heroTapSuitsWrap = document.getElementById('heroTapSuitsWrap');
+  const heroParticleBurst = document.getElementById('heroParticleBurst');
   const heroAudio = new Audio('assets/roll.mp3');
-  function startHero() {
+
+  function spawnParticles(container, count) {
+    if (!container) return;
+    const suits = ['♠', '♥', '♣', '♦'];
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + Math.random() * 0.6;
+      const dist = 100 + Math.random() * 150;
+      const px = Math.cos(angle) * dist;
+      const py = Math.sin(angle) * dist;
+      const el = document.createElement('span');
+      el.className = 'hero-particle';
+      el.style.setProperty('--px', px + 'px');
+      el.style.setProperty('--py', py + 'px');
+      el.style.animationDelay = Math.random() * 0.08 + 's';
+      if (i % 3 === 0) {
+        el.textContent = suits[i % 4];
+        el.style.width = el.style.height = '16px';
+        el.style.marginLeft = el.style.marginTop = '-8px';
+        el.style.fontSize = '12px';
+        el.style.background = 'none';
+        el.style.boxShadow = 'none';
+        el.style.color = 'rgba(255,255,255,0.95)';
+      }
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 850);
+    }
+  }
+
+  function startHero(ev) {
     if (!hero || hero.classList.contains('hero-started')) return;
     hero.classList.add('hero-started');
+    hero.classList.add('hero-shake');
+    setTimeout(() => hero.classList.remove('hero-shake'), 500);
+    spawnParticles(heroParticleBurst, 28);
     try { heroAudio.currentTime = 0; heroAudio.play().catch(() => {}); } catch (e) {}
     if (window.gtag) gtag('event', 'hero_started');
   }
+
   if (heroTapOverlay) {
-    heroTapOverlay.addEventListener('click', startHero);
-    heroTapOverlay.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startHero(); } });
+    heroTapOverlay.addEventListener('click', (e) => startHero(e));
+    heroTapOverlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startHero(e); }
+    });
   }
+  document.addEventListener('keydown', (e) => {
+    if (hero && !hero.classList.contains('hero-started') && !e.target.matches('input, textarea')) {
+      e.preventDefault();
+      startHero(e);
+    }
+  });
   hero.addEventListener('click', (e) => {
     if (e.target.closest('.hero-tap-overlay') || e.target.closest('a') || e.target.closest('button')) return;
     if (hero.classList.contains('hero-started')) return;
-    startHero();
+    startHero(e);
   });
 
-  // ----- Hero: mouse parallax (logo subtle move with cursor) -----
+  // Cursor-follow glow on overlay (before tap)
+  if (heroTapOverlay && heroCursorGlow) {
+    heroTapOverlay.addEventListener('mousemove', (e) => {
+      if (hero.classList.contains('hero-started')) return;
+      const rect = heroTapOverlay.getBoundingClientRect();
+      heroCursorGlow.style.left = (e.clientX - rect.left) + 'px';
+      heroCursorGlow.style.top = (e.clientY - rect.top) + 'px';
+      heroCursorGlow.style.opacity = '1';
+    });
+    heroTapOverlay.addEventListener('mouseleave', () => { heroCursorGlow.style.opacity = '0'; });
+  }
+
+  // Suits follow mouse (parallax) before tap — top, right, bottom, left
+  if (heroTapSuitsWrap) {
+    const suits = heroTapSuitsWrap.querySelectorAll('.hero-tap-suit');
+    const baseTransforms = ['translate(-50%, -50%)', 'translate(50%, -50%)', 'translate(-50%, 50%)', 'translate(-50%, -50%)'];
+    heroTapOverlay.addEventListener('mousemove', (e) => {
+      if (hero.classList.contains('hero-started')) return;
+      const rect = heroTapOverlay.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = Math.max(-1, Math.min(1, (e.clientX - cx) / (rect.width / 2)));
+      const dy = Math.max(-1, Math.min(1, (e.clientY - cy) / (rect.height / 2)));
+      const push = 14;
+      const ax = [0, dx * push, 0, -dx * push];
+      const ay = [-dy * push, dy * push * 0.6, dy * push, dy * push * 0.6];
+      suits.forEach((s, i) => {
+        s.style.transform = `${baseTransforms[i]} translate(${ax[i]}px, ${ay[i]}px)`;
+        const d = Math.hypot(e.clientX - cx, e.clientY - cy);
+        if (d < 100) {
+          s.style.color = 'rgba(255,255,255,0.7)';
+          s.style.textShadow = '0 0 16px rgba(255,255,255,0.4)';
+        } else {
+          s.style.color = '';
+          s.style.textShadow = '';
+        }
+      });
+    });
+    heroTapOverlay.addEventListener('mouseleave', () => {
+      suits.forEach((s, i) => {
+        s.style.transform = baseTransforms[i];
+        s.style.color = '';
+        s.style.textShadow = '';
+      });
+    });
+  }
+
+  // ----- Hero: mouse parallax (logo move with cursor after tap) -----
   const heroParallax = document.querySelector('.hero-logo-parallax');
   if (hero && heroParallax) {
     hero.addEventListener('mousemove', (e) => {
@@ -54,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const rect = hero.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
-      const dx = Math.round(x * 14);
-      const dy = Math.round(y * 14);
+      const dx = Math.round(x * 18);
+      const dy = Math.round(y * 18);
       heroParallax.style.transform = `translate(${dx}px, ${dy}px)`;
     });
     hero.addEventListener('mouseleave', () => { heroParallax.style.transform = ''; });
@@ -252,5 +342,98 @@ document.addEventListener('DOMContentLoaded', () => {
     if (paymentClose) paymentClose.addEventListener('click', () => { paymentModal.style.display = 'none'; paymentModal.setAttribute('aria-hidden', 'true'); });
     if (paymentOk) paymentOk.addEventListener('click', () => { paymentModal.style.display = 'none'; paymentModal.setAttribute('aria-hidden', 'true'); });
     paymentModal.addEventListener('click', (e) => { if (e.target === paymentModal) { paymentModal.style.display = 'none'; paymentModal.setAttribute('aria-hidden', 'true'); } });
+  }
+
+  // ----- Card Magic: pick a card, reveal -----
+  const VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+  const SUITS = [{ s: '♠', name: 'Spades', red: false }, { s: '♥', name: 'Hearts', red: true }, { s: '♣', name: 'Clubs', red: false }, { s: '♦', name: 'Diamonds', red: true }];
+  const VALUE_NAMES = { A: 'Ace', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten', J: 'Jack', Q: 'Queen', K: 'King' };
+
+  function buildDeck() {
+    const deck = [];
+    for (const v of VALUES) for (const suit of SUITS) deck.push({ value: v, suit: suit.s, suitName: suit.name, red: suit.red });
+    return deck;
+  }
+
+  function shuffleDeck(deck) {
+    const a = [...deck];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  const magicModal = document.getElementById('magicModal');
+  const magicCards = document.getElementById('magicCards');
+  const magicReveal = document.getElementById('magicReveal');
+  const magicRevealCard = document.getElementById('magicRevealCard');
+  const magicPickAgain = document.getElementById('magicPickAgain');
+  const magicModalClose = document.querySelector('.magic-modal-close');
+  const magicAudio = new Audio('assets/roll.mp3');
+
+  function openMagicModal() {
+    if (!magicModal) return;
+    magicModal.style.display = 'flex';
+    magicModal.setAttribute('aria-hidden', 'false');
+    shuffleMagicCards();
+    if (magicReveal) magicReveal.classList.remove('visible');
+    track('magic_modal_open');
+  }
+
+  function closeMagicModal() {
+    if (magicModal) {
+      magicModal.style.display = 'none';
+      magicModal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function shuffleMagicCards() {
+    if (!magicCards) return;
+    const deck = shuffleDeck(buildDeck());
+    const five = deck.slice(0, 5);
+    const cards = magicCards.querySelectorAll('.magic-card');
+    cards.forEach((el, i) => {
+      el.classList.remove('flipped');
+      const card = five[i];
+      const valueEl = el.querySelector('.magic-value');
+      const suitEl = el.querySelector('.magic-suit');
+      const front = el.querySelector('.magic-card-front');
+      if (valueEl) valueEl.textContent = card.value;
+      if (suitEl) suitEl.textContent = card.suit;
+      if (front) front.classList.toggle('red', card.red);
+      el.dataset.value = card.value;
+      el.dataset.suitName = card.suitName;
+      el.dataset.red = card.red ? '1' : '0';
+    });
+  }
+
+  function onMagicCardClick(el) {
+    if (el.classList.contains('flipped')) return;
+    el.classList.add('flipped');
+    const value = el.dataset.value;
+    const suitName = el.dataset.suitName || '';
+    const label = `${VALUE_NAMES[value] || value} of ${suitName}`;
+    if (magicRevealCard) magicRevealCard.textContent = label;
+    if (magicReveal) magicReveal.classList.add('visible');
+    try { magicAudio.currentTime = 0; magicAudio.play().catch(() => {}); } catch (e) {}
+    track('magic_card_reveal', { card: label });
+  }
+
+  document.querySelectorAll('.magic-trigger').forEach(btn => {
+    btn.addEventListener('click', openMagicModal);
+  });
+  if (magicModalClose) magicModalClose.addEventListener('click', closeMagicModal);
+  if (magicModal) {
+    magicModal.addEventListener('click', (e) => { if (e.target === magicModal) closeMagicModal(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && magicModal.getAttribute('aria-hidden') === 'false') closeMagicModal();
+    });
+  }
+  if (magicPickAgain) magicPickAgain.addEventListener('click', () => { shuffleMagicCards(); if (magicReveal) magicReveal.classList.remove('visible'); });
+  if (magicCards) {
+    magicCards.querySelectorAll('.magic-card').forEach(cardEl => {
+      cardEl.addEventListener('click', () => onMagicCardClick(cardEl));
+    });
   }
 });

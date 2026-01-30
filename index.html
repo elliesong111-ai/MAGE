@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
   <!-- Critical inline CSS: dark theme + TAP TO BEGIN visible even if style.css fails -->
   <style>
     body{background:#000!important;color:#fff!important;margin:0;font-family:Outfit,system-ui,sans-serif;}
@@ -59,13 +59,21 @@
     <button class="nav-toggle" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </nav>
 
-  <!-- Hero Section: Tap to begin → burst → logo → content -->
+  <!-- Hero Section: Game-style tap → burst → logo → content -->
   <header id="hero" class="hero">
+    <div class="hero-scanline" aria-hidden="true"></div>
     <div class="hero-tap-overlay" id="heroTapOverlay" role="button" tabindex="0" aria-label="Start">
-      <span class="hero-tap-suits">♠ ♥ ♣ ♦</span>
+      <div class="hero-cursor-glow" id="heroCursorGlow" aria-hidden="true"></div>
+      <div class="hero-tap-suits-wrap" id="heroTapSuitsWrap">
+        <span class="hero-tap-suit" data-suit="♠">♠</span>
+        <span class="hero-tap-suit" data-suit="♥">♥</span>
+        <span class="hero-tap-suit" data-suit="♣">♣</span>
+        <span class="hero-tap-suit" data-suit="♦">♦</span>
+      </div>
       <span class="hero-tap-text">TAP TO BEGIN</span>
       <span class="hero-tap-sub">the magic</span>
-      <span class="hero-tap-hint">click or tap anywhere</span>
+      <span class="hero-tap-hint">click · tap · or press any key</span>
+      <div class="hero-particle-burst" id="heroParticleBurst" aria-hidden="true"></div>
     </div>
     <div class="hero-bg">
       <div class="hero-vignette" aria-hidden="true"></div>
@@ -261,6 +269,18 @@
         </div>
         <p class="mat-stage-caption">Card flourish + chip stack on the mat — bullet time.</p>
       </div>
+      <div class="magic-cta-wrap">
+        <button type="button" class="cta cta-primary magic-trigger">Pick a card — try the trick</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Card Magic section: CTA to open pick-a-card -->
+  <section id="magic" class="section magic-section">
+    <div class="container">
+      <h2 class="section-title">Card Magic · Pick a card</h2>
+      <p class="section-intro">The same feel you get at the table — online. Click below, pick any card, and we'll reveal it.</p>
+      <button type="button" class="cta cta-primary magic-trigger">Pick a card, any card</button>
     </div>
   </section>
 
@@ -391,6 +411,26 @@
     </div>
   </div>
 
+  <!-- Card Magic Modal: pick a card, reveal -->
+  <div id="magicModal" class="modal magic-modal" role="dialog" aria-modal="true" aria-labelledby="magicModalTitle" aria-hidden="true">
+    <div class="modal-content magic-modal-content">
+      <button class="close magic-modal-close" aria-label="Close">&times;</button>
+      <h2 id="magicModalTitle">Pick a card, any card</h2>
+      <p class="magic-modal-sub">Click one — we'll reveal your card.</p>
+      <div class="magic-cards" id="magicCards">
+        <div class="magic-card" data-index="0"><div class="magic-card-inner"><div class="magic-card-back"></div><div class="magic-card-front"><span class="magic-value"></span><span class="magic-suit"></span></div></div></div>
+        <div class="magic-card" data-index="1"><div class="magic-card-inner"><div class="magic-card-back"></div><div class="magic-card-front"><span class="magic-value"></span><span class="magic-suit"></span></div></div></div>
+        <div class="magic-card" data-index="2"><div class="magic-card-inner"><div class="magic-card-back"></div><div class="magic-card-front"><span class="magic-value"></span><span class="magic-suit"></span></div></div></div>
+        <div class="magic-card" data-index="3"><div class="magic-card-inner"><div class="magic-card-back"></div><div class="magic-card-front"><span class="magic-value"></span><span class="magic-suit"></span></div></div></div>
+        <div class="magic-card" data-index="4"><div class="magic-card-inner"><div class="magic-card-back"></div><div class="magic-card-front"><span class="magic-value"></span><span class="magic-suit"></span></div></div></div>
+      </div>
+      <div class="magic-reveal" id="magicReveal">
+        <p class="magic-reveal-text">Your card: <strong id="magicRevealCard"></strong></p>
+        <button type="button" class="cta cta-ghost magic-pick-again" id="magicPickAgain">Pick again</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Add to Cart Modal (quick add) -->
   <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
     <div class="modal-content modal-shop">
@@ -412,6 +452,6 @@
     </div>
   </div>
 
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>
