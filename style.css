@@ -1005,7 +1005,29 @@ body {
 }
 .cart-items:empty::before { content: 'Cart is empty'; }
 .cart-empty { color: var(--gray); margin: 0; font-size: 0.9rem; }
-.cart-line { margin-bottom: 6px; color: var(--white); }
+.cart-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+  color: var(--white);
+}
+.cart-line-text { flex: 1; }
+.cart-dec {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  border: 1px solid var(--border-white);
+  background: transparent;
+  color: var(--white);
+  cursor: pointer;
+  line-height: 1;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.cart-dec:hover { background: rgba(255,255,255,0.1); }
 .summary-row {
   display: flex;
   justify-content: space-between;

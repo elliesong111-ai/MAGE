@@ -270,8 +270,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (cart.length === 0) {
         cartItemsEl.innerHTML = '<p class="cart-empty">Cart is empty. Add items from Shop.</p>';
       } else {
-        cartItemsEl.innerHTML = cart.map(item =>
-          `<div class="cart-line">${item.name} × ${item.qty} — $${(item.price * item.qty).toFixed(2)}</div>`
+        cartItemsEl.innerHTML = cart.map((item, index) =>
+          `<div class="cart-line" data-ts="${item.ts || ''}" data-index="${index}">
+            <button type="button" class="cart-dec" aria-label="Decrease quantity">−</button>
+            <span class="cart-line-text">${item.name} × ${item.qty} — $${(item.price * item.qty).toFixed(2)}</span>
+          </div>`
         ).join('');
       }
     }
@@ -289,6 +292,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const giftWrap = document.getElementById('giftWrap');
     if (giftWrap && giftWrap.checked) total += 5;
     if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
+  }
+
+  if (document.getElementById('cartItems')) {
+    const cartItemsEl = document.getElementById('cartItems');
+    if (cartItemsEl && !cartItemsEl.dataset.bound) {
+      cartItemsEl.addEventListener('click', (e) => {
+        const btn = e.target.closest('.cart-dec');
+        if (!btn) return;
+        const line = btn.closest('.cart-line');
+        if (!line) return;
+        const ts = line.dataset.ts;
+        const index = parseInt(line.dataset.index || '-1', 10);
+        const cart = getCart();
+        let idx = -1;
+        if (ts) {
+          idx = cart.findIndex(item => String(item.ts) === String(ts));
+        }
+        if (idx === -1 && index >= 0) idx = index;
+        if (idx < 0) return;
+        const sku = cart[idx]?.sku;
+        if ((cart[idx].qty || 1) > 1) {
+          cart[idx].qty -= 1;
+        } else {
+          cart.splice(idx, 1);
+        }
+        setCart(cart);
+        track('cart_decrease', { sku });
+      });
+      cartItemsEl.dataset.bound = 'true';
+    }
   }
 
   const countrySelect = document.getElementById('country');
