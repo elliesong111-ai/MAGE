@@ -207,6 +207,19 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollObserver.observe(features);
   });
 
+  // Mat demo animation trigger
+  const matDemoEl = document.querySelector('.mat-demo');
+  if (matDemoEl) {
+    const matObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          matDemoEl.classList.add('mat-animate');
+        }
+      });
+    }, { threshold: 0.4 });
+    matObserver.observe(matDemoEl);
+  }
+
   // Count-up animation for numbers
   function animateCountUp(element, target, duration = 1500) {
     const start = 0;
