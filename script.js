@@ -918,9 +918,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // =====================================================
-  // REAL MAGIC TRICK: The 21 Card Trick (经典21张牌魔术)
+  // SHARED CARD HELPERS
   // =====================================================
-  
   const VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
   const SUITS = [
     { s: '♠', name: 'Spades', red: false },
@@ -929,14 +928,6 @@ document.addEventListener('DOMContentLoaded', () => {
     { s: '♦', name: 'Diamonds', red: true }
   ];
   const VALUE_NAMES = { A: 'Ace', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten', J: 'Jack', Q: 'Queen', K: 'King' };
-
-  // Magic state
-  let magicState = {
-    phase: 'intro',
-    deck: [],
-    round: 0,
-    userCard: null,
-  };
 
   function buildFullDeck() {
     const deck = [];
@@ -981,7 +972,29 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
   }
 
-  function dealIntoColumns(deck) {
+  function renderGrid(deck) {
+    return `
+      <div class="magic-grid">
+        ${deck.map((card, index) => `
+          <div class="magic-grid-cell" data-row="${Math.floor(index / 3)}" data-col="${index % 3}">
+            ${getCardHTML(card, index)}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // =====================================================
+  // MAGIC TRICK #1: The 21 Card Trick
+  // =====================================================
+  let magic21State = {
+    phase: 'intro',
+    deck: [],
+    round: 0,
+    userCard: null,
+  };
+
+  function dealIntoColumns21(deck) {
     const columns = [[], [], []];
     for (let i = 0; i < 21; i++) {
       columns[i % 3].push(deck[i]);
@@ -989,41 +1002,38 @@ document.addEventListener('DOMContentLoaded', () => {
     return columns;
   }
 
-  function collectCards(columns, selectedCol) {
+  function collectCards21(columns, selectedCol) {
     const newDeck = [];
     const before = selectedCol === 0 ? 1 : 0;
     const after = selectedCol === 2 ? 1 : 2;
-    
     for (const card of columns[before]) newDeck.push(card);
     for (const card of columns[selectedCol]) newDeck.push(card);
     for (const card of columns[after]) newDeck.push(card);
-    
     return newDeck;
   }
 
-  function renderMagicUI() {
+  function renderMagic21UI() {
     const magicContent = document.getElementById('magicContent');
     if (!magicContent) return;
-
-    switch (magicState.phase) {
+    switch (magic21State.phase) {
       case 'intro':
-        renderIntro(magicContent);
+        render21Intro(magicContent);
         break;
       case 'memorize':
-        renderMemorize(magicContent);
+        render21Memorize(magicContent);
         break;
       case 'round1':
       case 'round2':
       case 'round3':
-        renderRound(magicContent);
+        render21Round(magicContent);
         break;
       case 'reveal':
-        renderReveal(magicContent);
+        render21Reveal(magicContent);
         break;
     }
   }
 
-  function renderIntro(container) {
+  function render21Intro(container) {
     container.innerHTML = `
       <div class="magic-intro">
         <div class="magic-icon">🎴</div>
@@ -1035,26 +1045,25 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="step"><span class="step-num">3</span><span>Answer 3 simple questions</span></div>
           <div class="step"><span class="step-num">4</span><span>I'll read your mind ✨</span></div>
         </div>
-        <button class="magic-btn primary" id="startMagicBtn">
+        <button class="magic-btn primary" id="startMagic21Btn">
           <span>Begin the Magic</span>
           <span class="btn-sparkle">✦</span>
         </button>
       </div>
     `;
 
-    document.getElementById('startMagicBtn').addEventListener('click', () => {
+    document.getElementById('startMagic21Btn').addEventListener('click', () => {
       const fullDeck = shuffleDeck(buildFullDeck());
-      magicState.deck = fullDeck.slice(0, 21);
-      magicState.phase = 'memorize';
-      magicState.round = 0;
-      renderMagicUI();
+      magic21State.deck = fullDeck.slice(0, 21);
+      magic21State.phase = 'memorize';
+      magic21State.round = 0;
+      renderMagic21UI();
       playMagicSound('shuffle');
     });
   }
 
-  function renderMemorize(container) {
-    const columns = dealIntoColumns(magicState.deck);
-    
+  function render21Memorize(container) {
+    const columns = dealIntoColumns21(magic21State.deck);
     container.innerHTML = `
       <div class="magic-memorize">
         <div class="magic-header">
@@ -1069,31 +1078,29 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           `).join('')}
         </div>
-        <button class="magic-btn primary" id="cardMemorizedBtn">
+        <button class="magic-btn primary" id="cardMemorized21Btn">
           <span>I've memorized my card</span>
           <span class="btn-arrow">→</span>
         </button>
       </div>
     `;
 
-    document.getElementById('cardMemorizedBtn').addEventListener('click', () => {
-      magicState.phase = 'round1';
-      magicState.round = 1;
-      renderMagicUI();
+    document.getElementById('cardMemorized21Btn').addEventListener('click', () => {
+      magic21State.phase = 'round1';
+      magic21State.round = 1;
+      renderMagic21UI();
       playMagicSound('flip');
     });
   }
 
-  function renderRound(container) {
-    const columns = dealIntoColumns(magicState.deck);
-    const roundNum = magicState.round;
-    
+  function render21Round(container) {
+    const columns = dealIntoColumns21(magic21State.deck);
+    const roundNum = magic21State.round;
     const messages = [
       "Which column contains your card?",
       "I'm getting closer... which column now?",
       "Final question — which column?"
     ];
-
     const hints = [
       "Click the column that has your card",
       "The magic is working...",
@@ -1129,31 +1136,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
     container.querySelectorAll('.column-select-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
-        const col = parseInt(e.currentTarget.dataset.column);
-        selectColumn(col);
+        const col = parseInt(e.currentTarget.dataset.column, 10);
+        select21Column(col);
       });
     });
 
     container.querySelectorAll('.magic-column-select').forEach(colEl => {
       colEl.addEventListener('click', (e) => {
         if (e.target.closest('.column-select-btn')) return;
-        const col = parseInt(colEl.dataset.column);
-        selectColumn(col);
+        const col = parseInt(colEl.dataset.column, 10);
+        select21Column(col);
       });
     });
   }
 
-  function selectColumn(colIndex) {
-    const columns = dealIntoColumns(magicState.deck);
-    magicState.deck = collectCards(columns, colIndex);
-    magicState.round++;
-    
+  function select21Column(colIndex) {
+    const columns = dealIntoColumns21(magic21State.deck);
+    magic21State.deck = collectCards21(columns, colIndex);
+    magic21State.round++;
     playMagicSound('shuffle');
 
-    if (magicState.round > 3) {
-      magicState.phase = 'reveal';
-      magicState.userCard = magicState.deck[10];
-      
+    if (magic21State.round > 3) {
+      magic21State.phase = 'reveal';
+      magic21State.userCard = magic21State.deck[10];
       const magicContent = document.getElementById('magicContent');
       magicContent.innerHTML = `
         <div class="magic-thinking">
@@ -1167,21 +1172,19 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </div>
       `;
-      
       setTimeout(() => {
-        renderMagicUI();
+        renderMagic21UI();
         playMagicSound('magic');
       }, 2500);
     } else {
-      magicState.phase = `round${magicState.round}`;
-      renderMagicUI();
+      magic21State.phase = `round${magic21State.round}`;
+      renderMagic21UI();
     }
   }
 
-  function renderReveal(container) {
-    const card = magicState.userCard;
+  function render21Reveal(container) {
+    const card = magic21State.userCard;
     const label = getCardLabel(card);
-    
     container.innerHTML = `
       <div class="magic-reveal-section">
         <div class="reveal-dramatic">
@@ -1218,21 +1221,20 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         
         <div class="reveal-actions">
-          <button class="magic-btn secondary" id="howItWorksBtn">
+          <button class="magic-btn secondary" id="howItWorks21Btn">
             <span>How did you do that?</span>
           </button>
-          <button class="magic-btn primary" id="tryAgainBtn">
+          <button class="magic-btn primary" id="tryAgain21Btn">
             <span>Try Again</span>
             <span class="btn-sparkle">✦</span>
           </button>
         </div>
         
-        <div class="magic-explanation" id="magicExplanation" style="display: none;">
+        <div class="magic-explanation" id="magicExplanation21" style="display: none;">
           <div class="explanation-content">
             <h4>The Secret ✨</h4>
             <p>This is the classic <strong>21 Card Trick</strong>, a mathematical magic trick that always works!</p>
             <p>When you deal 21 cards into 3 columns of 7 and pick up the chosen column in the middle, repeating 3 times, the card always ends up in position 11 (the exact middle).</p>
-            <p>The math: After each round, your card moves closer to the center of the deck. After 3 rounds, it's guaranteed to be the 11th card.</p>
             <p class="explanation-note">Now you can perform this trick with a real deck! 🎴</p>
           </div>
         </div>
@@ -1241,7 +1243,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       container.querySelector('.reveal-card-container')?.classList.add('revealed');
-      // Trigger golden rain and confetti for reveal
       if (window.MageParticles) {
         const revealCard = container.querySelector('.reveal-card-container');
         if (revealCard) {
@@ -1252,12 +1253,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }, 100);
 
-    document.getElementById('tryAgainBtn').addEventListener('click', () => {
-      resetMagic();
+    document.getElementById('tryAgain21Btn').addEventListener('click', () => {
+      resetMagic21();
     });
 
-    document.getElementById('howItWorksBtn').addEventListener('click', (e) => {
-      const explanation = document.getElementById('magicExplanation');
+    document.getElementById('howItWorks21Btn').addEventListener('click', (e) => {
+      const explanation = document.getElementById('magicExplanation21');
       if (explanation) {
         explanation.style.display = explanation.style.display === 'none' ? 'block' : 'none';
         e.currentTarget.querySelector('span').textContent = explanation.style.display === 'none' ? 'How did you do that?' : 'Hide explanation';
@@ -1265,14 +1266,278 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function resetMagic() {
-    magicState = {
+  function resetMagic21() {
+    magic21State = {
       phase: 'intro',
       deck: [],
       round: 0,
       userCard: null,
     };
-    renderMagicUI();
+    renderMagic21UI();
+    playMagicSound('shuffle');
+  }
+
+  // =====================================================
+  // MAGIC TRICK #2: Binary Oracle (8-card yes/no)
+  // =====================================================
+  let binaryMagicState = {
+    phase: 'intro',
+    deck: [],
+    answers: [0, 0, 0],
+    step: 0,
+    userCard: null,
+  };
+
+  function renderBinaryMagicUI() {
+    const binaryContent = document.getElementById('magicBinaryContent');
+    if (!binaryContent) return;
+
+    switch (binaryMagicState.phase) {
+      case 'intro':
+        renderBinaryIntro(binaryContent);
+        break;
+      case 'memorize':
+        renderBinaryMemorize(binaryContent);
+        break;
+      case 'q1':
+      case 'q2':
+      case 'q3':
+        renderBinaryQuestion(binaryContent);
+        break;
+      case 'reveal':
+        renderBinaryReveal(binaryContent);
+        break;
+    }
+  }
+
+  function renderBinaryIntro(container) {
+    container.innerHTML = `
+      <div class="magic-intro">
+        <div class="magic-icon">🪄</div>
+        <h3>Binary Oracle</h3>
+        <p class="magic-subtitle">Three questions. One perfect reveal.</p>
+        <div class="magic-steps">
+          <div class="step"><span class="step-num">1</span><span>I'll show you 8 cards</span></div>
+          <div class="step"><span class="step-num">2</span><span>Pick one card in your mind</span></div>
+          <div class="step"><span class="step-num">3</span><span>Answer 3 yes/no questions</span></div>
+          <div class="step"><span class="step-num">4</span><span>I'll reveal it ✨</span></div>
+        </div>
+        <button class="magic-btn primary" id="startBinaryMagicBtn">
+          <span>Begin the Magic</span>
+          <span class="btn-sparkle">✦</span>
+        </button>
+      </div>
+    `;
+
+    document.getElementById('startBinaryMagicBtn').addEventListener('click', () => {
+      const fullDeck = shuffleDeck(buildFullDeck());
+      binaryMagicState.deck = fullDeck.slice(0, 8);
+      binaryMagicState.answers = [0, 0, 0];
+      binaryMagicState.step = 0;
+      binaryMagicState.phase = 'memorize';
+      renderBinaryMagicUI();
+      playMagicSound('shuffle');
+    });
+  }
+
+  function renderBinaryMemorize(container) {
+    container.innerHTML = `
+      <div class="magic-memorize">
+        <div class="magic-header">
+          <h3>Memorize One Card</h3>
+          <p>Pick <strong>ONE card</strong> and remember it.</p>
+          <p class="magic-hint">You'll answer 3 yes/no questions next.</p>
+        </div>
+        <div class="magic-binary-grid">
+          ${binaryMagicState.deck.map((card, index) => `
+            <div class="magic-grid-cell" data-index="${index}">
+              ${getCardHTML(card, index)}
+            </div>
+          `).join('')}
+        </div>
+        <button class="magic-btn primary" id="binaryMemorizedBtn">
+          <span>I'm ready</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+    `;
+
+    document.getElementById('binaryMemorizedBtn').addEventListener('click', () => {
+      binaryMagicState.phase = 'q1';
+      binaryMagicState.step = 0;
+      renderBinaryMagicUI();
+      playMagicSound('flip');
+    });
+  }
+
+  function getBinarySetCards(step) {
+    return binaryMagicState.deck.filter((_, index) => (index & (1 << step)) !== 0);
+  }
+
+  function renderBinaryQuestion(container) {
+    const step = binaryMagicState.step;
+    const cards = getBinarySetCards(step);
+    const prompts = [
+      'Question 1: Is your card in this group?',
+      'Question 2: Do you see your card here?',
+      'Question 3: Final check — is it in this group?'
+    ];
+
+    container.innerHTML = `
+      <div class="magic-round">
+        <div class="magic-header">
+          <h3>${prompts[step]}</h3>
+          <p class="magic-hint">Answer yes or no</p>
+        </div>
+        <div class="magic-binary-grid">
+          ${cards.map((card, index) => `
+            <div class="magic-grid-cell">
+              ${getCardHTML(card, index)}
+            </div>
+          `).join('')}
+        </div>
+        <div class="binary-buttons">
+          <button class="magic-btn primary binary-yes">Yes</button>
+          <button class="magic-btn secondary binary-no">No</button>
+        </div>
+      </div>
+    `;
+
+    container.querySelector('.binary-yes').addEventListener('click', () => handleBinaryAnswer(1));
+    container.querySelector('.binary-no').addEventListener('click', () => handleBinaryAnswer(0));
+  }
+
+  function handleBinaryAnswer(answer) {
+    binaryMagicState.answers[binaryMagicState.step] = answer;
+    playMagicSound('shuffle');
+
+    if (binaryMagicState.step < 2) {
+      binaryMagicState.step += 1;
+      binaryMagicState.phase = `q${binaryMagicState.step + 1}`;
+      renderBinaryMagicUI();
+      return;
+    }
+
+    const number = (binaryMagicState.answers[0] << 0) +
+      (binaryMagicState.answers[1] << 1) +
+      (binaryMagicState.answers[2] << 2);
+    binaryMagicState.userCard = binaryMagicState.deck[number];
+    binaryMagicState.phase = 'reveal';
+
+    const binaryContent = document.getElementById('magicBinaryContent');
+    binaryContent.innerHTML = `
+      <div class="magic-thinking">
+        <div class="thinking-animation">
+          <div class="thinking-cards">
+            <div class="floating-card">🎴</div>
+            <div class="floating-card delay-1">🎴</div>
+            <div class="floating-card delay-2">🎴</div>
+          </div>
+          <div class="thinking-text">Decoding the oracle...</div>
+        </div>
+      </div>
+    `;
+
+    playMagicSound('magic');
+    setTimeout(() => {
+      renderBinaryMagicUI();
+      playMagicSound('magic');
+    }, 1400);
+  }
+
+  function renderBinaryReveal(container) {
+    const card = binaryMagicState.userCard;
+    const label = getCardLabel(card);
+    container.innerHTML = `
+      <div class="magic-reveal-section">
+        <div class="reveal-dramatic">
+          <div class="magic-sparkles">
+            <span class="sparkle s1">✦</span>
+            <span class="sparkle s2">✧</span>
+            <span class="sparkle s3">✦</span>
+            <span class="sparkle s4">✧</span>
+            <span class="sparkle s5">✦</span>
+          </div>
+          <h3>Your card is...</h3>
+        </div>
+        
+        <div class="reveal-card-container">
+          <div class="reveal-card ${card.red ? 'red' : ''}">
+            <div class="reveal-card-inner">
+              <span class="corner top-left">
+                <span class="card-value">${card.value}</span>
+                <span class="card-suit-small">${card.suit}</span>
+              </span>
+              <span class="card-suit-center large">${card.suit}</span>
+              <span class="corner bottom-right">
+                <span class="card-value">${card.value}</span>
+                <span class="card-suit-small">${card.suit}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="reveal-label">${label}</div>
+        
+        <div class="reveal-reaction">
+          <p>Was I right? ✨</p>
+        </div>
+        
+        <div class="reveal-actions">
+          <button class="magic-btn secondary" id="howItWorksBinaryBtn">
+            <span>How did you do that?</span>
+          </button>
+          <button class="magic-btn primary" id="tryAgainBinaryBtn">
+            <span>Try Again</span>
+            <span class="btn-sparkle">✦</span>
+          </button>
+        </div>
+        
+        <div class="magic-explanation" id="magicExplanationBinary" style="display: none;">
+          <div class="explanation-content">
+            <h4>The Secret ✨</h4>
+            <p>This uses a <strong>binary pattern</strong>. Each yes/no answer flips a bit.</p>
+            <p>Three answers create a number from 0–7, which maps to the exact card position.</p>
+            <p class="explanation-note">It feels like mind-reading — but it's pure math. 🎴</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      container.querySelector('.reveal-card-container')?.classList.add('revealed');
+      if (window.MageParticles) {
+        const revealCard = container.querySelector('.reveal-card-container');
+        if (revealCard) {
+          const rect = revealCard.getBoundingClientRect();
+          window.MageParticles.confetti(rect.left + rect.width / 2, rect.top, 40);
+        }
+        window.MageParticles.goldenRain(container);
+      }
+    }, 100);
+
+    document.getElementById('tryAgainBinaryBtn').addEventListener('click', () => {
+      resetBinaryMagic();
+    });
+
+    document.getElementById('howItWorksBinaryBtn').addEventListener('click', (e) => {
+      const explanation = document.getElementById('magicExplanationBinary');
+      if (explanation) {
+        explanation.style.display = explanation.style.display === 'none' ? 'block' : 'none';
+        e.currentTarget.querySelector('span').textContent = explanation.style.display === 'none' ? 'How did you do that?' : 'Hide explanation';
+      }
+    });
+  }
+
+  function resetBinaryMagic() {
+    binaryMagicState = {
+      phase: 'intro',
+      deck: [],
+      answers: [0, 0, 0],
+      step: 0,
+      userCard: null,
+    };
+    renderBinaryMagicUI();
     playMagicSound('shuffle');
   }
 
@@ -1288,7 +1553,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (e) {}
   }
 
-  // Magic Modal controls
+  // Magic Modal controls (21-card trick)
   const magicModal = document.getElementById('magicModal');
   const magicModalClose = document.querySelector('.magic-modal-close');
 
@@ -1296,7 +1561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!magicModal) return;
     magicModal.style.display = 'flex';
     magicModal.setAttribute('aria-hidden', 'false');
-    resetMagic();
+    resetMagic21();
     track('magic_modal_open');
   }
 
@@ -1322,6 +1587,44 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && magicModal.getAttribute('aria-hidden') === 'false') {
         closeMagicModal();
+      }
+    });
+  }
+
+  // Magic Binary Modal controls
+  const magicBinaryModal = document.getElementById('magicBinaryModal');
+  const magicBinaryModalClose = document.querySelector('.magic-binary-modal-close');
+
+  function openMagicBinaryModal() {
+    if (!magicBinaryModal) return;
+    magicBinaryModal.style.display = 'flex';
+    magicBinaryModal.setAttribute('aria-hidden', 'false');
+    resetBinaryMagic();
+    track('magic_binary_modal_open');
+  }
+
+  function closeMagicBinaryModal() {
+    if (magicBinaryModal) {
+      magicBinaryModal.style.display = 'none';
+      magicBinaryModal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  document.querySelectorAll('.magic-binary-trigger').forEach(btn => {
+    btn.addEventListener('click', openMagicBinaryModal);
+  });
+
+  if (magicBinaryModalClose) {
+    magicBinaryModalClose.addEventListener('click', closeMagicBinaryModal);
+  }
+
+  if (magicBinaryModal) {
+    magicBinaryModal.addEventListener('click', (e) => {
+      if (e.target === magicBinaryModal) closeMagicBinaryModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && magicBinaryModal.getAttribute('aria-hidden') === 'false') {
+        closeMagicBinaryModal();
       }
     });
   }
