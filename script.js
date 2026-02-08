@@ -218,6 +218,10 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }, { threshold: 0.4 });
     matObserver.observe(matDemoEl);
+    // Fallback: trigger once shortly after load
+    setTimeout(() => {
+      matDemoEl.classList.add('mat-animate');
+    }, 800);
   }
 
   // Count-up animation for numbers
