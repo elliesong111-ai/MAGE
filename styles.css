@@ -1972,6 +1972,48 @@ p { margin: 0 0 16px; }
   flex-wrap: wrap;
 }
 
+/* 9-Card Grid */
+.magic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(70px, 1fr));
+  gap: 14px;
+  justify-items: center;
+  margin: 24px auto 32px;
+  max-width: 360px;
+}
+
+.magic-grid-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.magic-row-buttons,
+.magic-col-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.magic-binary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(70px, 1fr));
+  gap: 14px;
+  justify-items: center;
+  margin: 24px auto 32px;
+  max-width: 420px;
+}
+
+.binary-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
 .magic-column-cards {
   display: flex;
   flex-direction: column;
