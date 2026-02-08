@@ -4,6 +4,394 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[track]', eventName, params);
   }
 
+  // =====================================================
+  // MAGIC PARTICLE SYSTEM
+  // =====================================================
+
+  // Create particle container
+  const particleContainer = document.createElement('div');
+  particleContainer.className = 'particle-container';
+  document.body.appendChild(particleContainer);
+
+  // Create background stars
+  const bgStars = document.createElement('div');
+  bgStars.className = 'bg-stars';
+  document.body.appendChild(bgStars);
+
+  function createBackgroundStars() {
+    const symbols = ['✦', '✧', '★', '☆', '✴', '✵'];
+    for (let i = 0; i < 30; i++) {
+      const star = document.createElement('span');
+      star.className = 'bg-star';
+      star.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 8 + 's';
+      star.style.animationDuration = (6 + Math.random() * 4) + 's';
+      star.style.fontSize = (6 + Math.random() * 8) + 'px';
+      bgStars.appendChild(star);
+    }
+  }
+  createBackgroundStars();
+
+  // Particle burst on button click
+  function createParticleBurst(x, y, count = 12) {
+    const colors = ['#8b5cf6', '#fbbf24', '#ec4899', '#10b981', '#3b82f6'];
+    const symbols = ['✦', '✧', '★', '♠', '♥', '♣', '♦'];
+    
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      const isSymbol = Math.random() > 0.5;
+      
+      if (isSymbol) {
+        particle.className = 'particle particle-star';
+        particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+      } else {
+        particle.className = 'particle particle-spark';
+      }
+      
+      const angle = (Math.PI * 2 * i) / count;
+      const distance = 50 + Math.random() * 100;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      particle.style.setProperty('--tx', tx + 'px');
+      particle.style.setProperty('--ty', ty + 'px');
+      particle.style.animationDelay = (Math.random() * 0.1) + 's';
+      
+      particleContainer.appendChild(particle);
+      setTimeout(() => particle.remove(), 1200);
+    }
+  }
+
+  // Golden rain effect for magic reveal
+  function createGoldenRain(container) {
+    const rainContainer = document.createElement('div');
+    rainContainer.className = 'golden-rain';
+    container.appendChild(rainContainer);
+
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const particle = document.createElement('div');
+        particle.className = 'gold-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 0.5 + 's';
+        particle.style.animationDuration = (1.5 + Math.random()) + 's';
+        rainContainer.appendChild(particle);
+        setTimeout(() => particle.remove(), 3000);
+      }, i * 40);
+    }
+
+    setTimeout(() => rainContainer.remove(), 5000);
+  }
+
+  // Confetti burst
+  function createConfetti(x, y, count = 30) {
+    const colors = ['#8b5cf6', '#fbbf24', '#ec4899', '#10b981', '#3b82f6', '#ef4444', '#06b6d4'];
+    
+    for (let i = 0; i < count; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.left = x + (Math.random() - 0.5) * 100 + 'px';
+      confetti.style.top = y + 'px';
+      confetti.style.width = (5 + Math.random() * 10) + 'px';
+      confetti.style.height = (5 + Math.random() * 10) + 'px';
+      confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+      confetti.style.animationDelay = Math.random() * 0.3 + 's';
+      confetti.style.animationDuration = (2 + Math.random()) + 's';
+      
+      particleContainer.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 3500);
+    }
+  }
+
+  // Sparkle trail on mouse move (optional, can be toggled)
+  let sparkleTrailEnabled = false;
+  let lastSparkleTime = 0;
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!sparkleTrailEnabled) return;
+    const now = Date.now();
+    if (now - lastSparkleTime < 50) return;
+    lastSparkleTime = now;
+
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle-trail';
+    sparkle.style.left = e.clientX + 'px';
+    sparkle.style.top = e.clientY + 'px';
+    document.body.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 500);
+  });
+
+  // Add particle burst to all CTA buttons
+  document.querySelectorAll('.cta, .btn-add, .magic-btn').forEach(btn => {
+    btn.classList.add('btn-ripple');
+    btn.addEventListener('click', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      createParticleBurst(x, y, 8);
+    });
+  });
+
+  // Export functions for use in magic trick
+  window.MageParticles = {
+    burst: createParticleBurst,
+    goldenRain: createGoldenRain,
+    confetti: createConfetti,
+    toggleSparkleTrail: () => { sparkleTrailEnabled = !sparkleTrailEnabled; }
+  };
+
+  // =====================================================
+  // SCROLL-TRIGGERED ANIMATIONS
+  // =====================================================
+
+  // Elements to animate on scroll
+  const animateElements = [
+    { selector: '.section-title', class: 'visible' },
+    { selector: '.section-sub', class: 'visible', delay: 100 },
+    { selector: '.product-grid', class: 'visible' },
+    { selector: '.mat-features', class: 'visible' },
+    { selector: '.story-content', class: 'visible' },
+    { selector: '.community', class: 'visible' },
+    { selector: '.testimonials', class: 'visible' },
+    { selector: '.checkout-grid', class: 'visible' },
+    { selector: '.mat-demo', class: 'visible' }
+  ];
+
+  // Add initial animation classes
+  document.querySelectorAll('.section-title').forEach(el => el.classList.add('fade-up'));
+  document.querySelectorAll('.section-sub').forEach(el => el.classList.add('fade-up'));
+  document.querySelectorAll('.story-content').forEach(el => el.classList.add('slide-left'));
+  document.querySelectorAll('.community').forEach(el => el.classList.add('slide-right'));
+  document.querySelectorAll('.testimonials').forEach(el => el.classList.add('fade-scale'));
+  document.querySelectorAll('.checkout-grid').forEach(el => el.classList.add('fade-up'));
+  document.querySelectorAll('.mat-demo').forEach(el => el.classList.add('zoom-in'));
+
+  // Intersection Observer for scroll animations
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = entry.target.dataset.scrollDelay || 0;
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, parseInt(delay));
+        
+        // Unobserve after animation (one-time animation)
+        scrollObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+  // Observe all animated elements
+  animateElements.forEach(({ selector, delay }) => {
+    document.querySelectorAll(selector).forEach(el => {
+      if (delay) el.dataset.scrollDelay = delay;
+      scrollObserver.observe(el);
+    });
+  });
+
+  // Also observe product grids
+  document.querySelectorAll('.product-grid').forEach(grid => {
+    scrollObserver.observe(grid);
+  });
+
+  document.querySelectorAll('.mat-features').forEach(features => {
+    scrollObserver.observe(features);
+  });
+
+  // Count-up animation for numbers
+  function animateCountUp(element, target, duration = 1500) {
+    const start = 0;
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const current = Math.floor(start + (target - start) * easeProgress);
+      
+      element.textContent = current;
+      
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        element.textContent = target;
+      }
+    }
+    
+    requestAnimationFrame(update);
+  }
+
+  // Observe count-up elements
+  document.querySelectorAll('[data-count-target]').forEach(el => {
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = parseInt(entry.target.dataset.countTarget);
+          animateCountUp(entry.target, target);
+          countObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    countObserver.observe(el);
+  });
+
+  // Parallax effect on scroll
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        
+        // Parallax for background stars
+        if (bgStars) {
+          bgStars.style.transform = `translateY(${scrollY * 0.3}px)`;
+        }
+        
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // =====================================================
+  // VIDEO BACKGROUND HANDLING
+  // =====================================================
+
+  const heroVideo = document.getElementById('heroVideo');
+  
+  if (heroVideo) {
+    // Handle video load
+    heroVideo.addEventListener('canplaythrough', () => {
+      hero?.classList.add('video-loaded');
+    });
+
+    // Handle video error - show gradient fallback
+    heroVideo.addEventListener('error', () => {
+      heroVideo.style.display = 'none';
+      console.log('Video failed to load, using gradient fallback');
+    });
+
+    // Pause video when not visible (performance optimization)
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          heroVideo.play().catch(() => {});
+        } else {
+          heroVideo.pause();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    videoObserver.observe(heroVideo);
+
+    // Reduce video quality on slow connections
+    if (navigator.connection) {
+      const connection = navigator.connection;
+      if (connection.saveData || connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+        heroVideo.style.display = 'none';
+        console.log('Slow connection detected, using gradient fallback');
+      }
+    }
+  }
+
+  // =====================================================
+  // SOUND EFFECTS SYSTEM
+  // =====================================================
+
+  // Sound manager with volume control
+  const SoundManager = {
+    enabled: true,
+    volume: 0.5,
+    sounds: {},
+    
+    // Preload sounds
+    preload(name, src) {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
+      audio.volume = this.volume;
+      this.sounds[name] = audio;
+      return audio;
+    },
+    
+    // Play sound
+    play(name) {
+      if (!this.enabled) return;
+      
+      let audio = this.sounds[name];
+      
+      // If sound not preloaded, try to create it
+      if (!audio) {
+        const srcMap = {
+          'shuffle': 'assets/shuffle.mp3',
+          'flip': 'assets/flip.mp3',
+          'magic': 'assets/magic.mp3',
+          'success': 'assets/success.mp3',
+          'click': 'assets/click.mp3',
+          'roll': 'assets/roll.mp3'
+        };
+        
+        if (srcMap[name]) {
+          audio = this.preload(name, srcMap[name]);
+        } else {
+          return;
+        }
+      }
+      
+      // Clone for overlapping sounds
+      const clone = audio.cloneNode();
+      clone.volume = this.volume;
+      clone.play().catch(() => {});
+    },
+    
+    // Set volume
+    setVolume(vol) {
+      this.volume = Math.max(0, Math.min(1, vol));
+      Object.values(this.sounds).forEach(audio => {
+        audio.volume = this.volume;
+      });
+    },
+    
+    // Toggle sound
+    toggle() {
+      this.enabled = !this.enabled;
+      return this.enabled;
+    }
+  };
+
+  // Preload common sounds
+  SoundManager.preload('roll', 'assets/roll.mp3');
+  
+  // Export SoundManager globally
+  window.MageSound = SoundManager;
+
+  // Create sound control button
+  function createSoundControl() {
+    const btn = document.createElement('button');
+    btn.className = 'sound-control';
+    btn.innerHTML = '🔊';
+    btn.title = 'Toggle Sound';
+    btn.setAttribute('aria-label', 'Toggle sound effects');
+    
+    btn.addEventListener('click', () => {
+      const enabled = SoundManager.toggle();
+      btn.innerHTML = enabled ? '🔊' : '🔇';
+      btn.title = enabled ? 'Sound On' : 'Sound Off';
+    });
+    
+    document.body.appendChild(btn);
+  }
+  createSoundControl();
+
   // ----- Cart (localStorage) -----
   function getCart() {
     try { return JSON.parse(localStorage.getItem('mage_cart') || '[]'); } catch (e) { return []; }
@@ -353,6 +741,60 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----- Checkout form -----
   const PAYMENT_API_URL = 'https://mage-payment-backend.onrender.com';
 
+  // Create payment loading overlay
+  function showPaymentLoading() {
+    const overlay = document.createElement('div');
+    overlay.className = 'payment-loading';
+    overlay.id = 'paymentLoading';
+    overlay.innerHTML = `
+      <div class="payment-loading-content">
+        <div class="payment-cards">
+          <span class="payment-card-anim">🎴</span>
+          <span class="payment-card-anim">🎴</span>
+          <span class="payment-card-anim">🎴</span>
+        </div>
+        <div class="payment-spinner"></div>
+        <div class="payment-loading-text">Processing your order...</div>
+        <div class="payment-loading-sub">Shuffling magic into your cart ✨</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    
+    // Trigger particle effect
+    if (window.MageParticles) {
+      const rect = overlay.getBoundingClientRect();
+      window.MageParticles.burst(rect.width / 2, rect.height / 2, 20);
+    }
+    
+    return overlay;
+  }
+
+  function hidePaymentLoading() {
+    const overlay = document.getElementById('paymentLoading');
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 300);
+    }
+  }
+
+  function showPaymentError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'payment-error';
+    errorDiv.innerHTML = `
+      <div class="payment-error-title">⚠️ Payment Error</div>
+      <div class="payment-error-message">${message}</div>
+    `;
+    
+    const checkoutForm = document.getElementById('checkoutForm');
+    const existingError = checkoutForm?.querySelector('.payment-error');
+    if (existingError) existingError.remove();
+    
+    checkoutForm?.appendChild(errorDiv);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => errorDiv.remove(), 10000);
+  }
+
   const checkoutForm = document.getElementById('checkoutForm');
   if (checkoutForm) {
     checkoutForm.addEventListener('submit', async (e) => {
@@ -373,6 +815,12 @@ document.addEventListener('DOMContentLoaded', () => {
         address: formData.get('address') || '',
       };
 
+      // Validate required fields
+      if (!customer.name || !customer.email) {
+        showToast('Please fill in your name and email.');
+        return;
+      }
+
       const countrySelect = document.getElementById('country');
       const country = countrySelect ? countrySelect.value : '';
       let subtotal = 0;
@@ -385,10 +833,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const giftWrapEl = document.getElementById('giftWrap');
       const giftWrapChecked = giftWrapEl ? giftWrapEl.checked : false;
 
+      // Show loading state
       if (placeOrderBtn) {
-        placeOrderBtn.textContent = 'Processing...';
+        placeOrderBtn.classList.add('loading');
+        placeOrderBtn.textContent = '';
         placeOrderBtn.disabled = true;
       }
+
+      // Show full-screen loading overlay
+      const loadingOverlay = showPaymentLoading();
 
       try {
         const response = await fetch(`${PAYMENT_API_URL}/create-checkout`, {
@@ -406,28 +859,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (response.ok && data.checkout_url) {
           track('checkout_redirect', { total: subtotal + shipping + (giftWrapChecked ? 5 : 0) });
-          window.location.href = data.checkout_url;
+          
+          // Play success sound
+          if (window.MageSound) window.MageSound.play('success');
+          
+          // Confetti celebration
+          if (window.MageParticles) {
+            window.MageParticles.confetti(window.innerWidth / 2, window.innerHeight / 2, 50);
+          }
+          
+          // Short delay before redirect for visual feedback
+          setTimeout(() => {
+            window.location.href = data.checkout_url;
+          }, 800);
         } else {
+          hidePaymentLoading();
           console.error('Checkout error:', data);
+          
+          const errorMessage = data.error || 'Payment system unavailable. Please try again or contact us.';
+          showPaymentError(errorMessage);
+          
           const paymentModal = document.getElementById('paymentModal');
           if (paymentModal) {
             paymentModal.style.display = 'flex';
             paymentModal.setAttribute('aria-hidden', 'false');
-          } else {
-            showToast('Payment system unavailable. Please contact us to complete your order.');
           }
         }
       } catch (err) {
+        hidePaymentLoading();
         console.error('Checkout fetch error:', err);
+        
+        showPaymentError('Network error. Please check your connection and try again.');
+        
         const paymentModal = document.getElementById('paymentModal');
         if (paymentModal) {
           paymentModal.style.display = 'flex';
           paymentModal.setAttribute('aria-hidden', 'false');
-        } else {
-          showToast('Payment system unavailable. Please contact us to complete your order.');
         }
       } finally {
         if (placeOrderBtn) {
+          placeOrderBtn.classList.remove('loading');
           placeOrderBtn.textContent = originalText;
           placeOrderBtn.disabled = false;
         }
@@ -577,7 +1048,7 @@ document.addEventListener('DOMContentLoaded', () => {
       magicState.phase = 'memorize';
       magicState.round = 0;
       renderMagicUI();
-      playMagicSound();
+      playMagicSound('shuffle');
     });
   }
 
@@ -609,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
       magicState.phase = 'round1';
       magicState.round = 1;
       renderMagicUI();
-      playMagicSound();
+      playMagicSound('flip');
     });
   }
 
@@ -677,7 +1148,7 @@ document.addEventListener('DOMContentLoaded', () => {
     magicState.deck = collectCards(columns, colIndex);
     magicState.round++;
     
-    playMagicSound();
+    playMagicSound('shuffle');
 
     if (magicState.round > 3) {
       magicState.phase = 'reveal';
@@ -699,7 +1170,7 @@ document.addEventListener('DOMContentLoaded', () => {
       
       setTimeout(() => {
         renderMagicUI();
-        playMagicSound();
+        playMagicSound('magic');
       }, 2500);
     } else {
       magicState.phase = `round${magicState.round}`;
@@ -770,6 +1241,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     setTimeout(() => {
       container.querySelector('.reveal-card-container')?.classList.add('revealed');
+      // Trigger golden rain and confetti for reveal
+      if (window.MageParticles) {
+        const revealCard = container.querySelector('.reveal-card-container');
+        if (revealCard) {
+          const rect = revealCard.getBoundingClientRect();
+          window.MageParticles.confetti(rect.left + rect.width / 2, rect.top, 40);
+        }
+        window.MageParticles.goldenRain(container);
+      }
     }, 100);
 
     document.getElementById('tryAgainBtn').addEventListener('click', () => {
@@ -793,14 +1273,18 @@ document.addEventListener('DOMContentLoaded', () => {
       userCard: null,
     };
     renderMagicUI();
-    playMagicSound();
+    playMagicSound('shuffle');
   }
 
-  function playMagicSound() {
+  function playMagicSound(type = 'flip') {
     try {
-      const audio = new Audio('assets/roll.mp3');
-      audio.volume = 0.3;
-      audio.play().catch(() => {});
+      if (window.MageSound) {
+        window.MageSound.play(type);
+      } else {
+        const audio = new Audio('assets/roll.mp3');
+        audio.volume = 0.3;
+        audio.play().catch(() => {});
+      }
     } catch (e) {}
   }
 
