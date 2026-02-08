@@ -49,6 +49,15 @@
 
   <!-- Hero Section -->
   <section class="hero" id="hero">
+    <!-- Video Background (falls back to gradient on mobile) -->
+    <video class="hero-video-bg" id="heroVideo" autoplay muted loop playsinline preload="auto" poster="">
+      <!-- Add your video source here. Recommended: compressed MP4, < 5MB -->
+      <!-- Example: <source src="assets/magic-bg.mp4" type="video/mp4"> -->
+    </video>
+    <div class="hero-video-overlay"></div>
+    <!-- Animated Gradient Background (fallback) -->
+    <div class="hero-gradient-bg"></div>
+    
     <!-- Tap to begin overlay -->
     <div class="hero-tap-overlay" id="heroTapOverlay" tabindex="0" role="button" aria-label="Tap to begin">
       <div class="hero-cursor-glow" id="heroCursorGlow"></div>
@@ -276,7 +285,7 @@
   <!-- Checkout Section -->
   <section class="section checkout" id="checkout">
     <h2 class="section-title">Checkout · Build Your MAGE Setup</h2>
-    <p class="section-sub">Secure checkout. We accept WeChat Pay, Alipay, PayPal, and major credit cards.</p>
+    <p class="section-sub">Secure checkout powered by Square. We accept major credit cards, Apple Pay, and Google Pay.</p>
     <div class="checkout-grid">
       <form class="checkout-form" id="checkoutForm">
         <fieldset>
@@ -301,11 +310,13 @@
         <fieldset class="payment-methods">
           <legend>Payment Method</legend>
           <div class="payment-icons">
-            <span class="pay-icon wechat">WeChat</span>
-            <span class="pay-icon alipay">Alipay</span>
-            <span class="pay-icon paypal">PayPal</span>
-            <span class="pay-icon card">Credit Card</span>
+            <span class="pay-icon card">💳 Card</span>
+            <span class="pay-icon apple">🍎 Apple Pay</span>
+            <span class="pay-icon google">🔵 Google Pay</span>
           </div>
+          <p style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-top: 12px;">
+            ✨ Secure payment powered by Square
+          </p>
         </fieldset>
         <button type="submit" class="cta cta-primary checkout-btn" id="placeOrderBtn">Place Order</button>
       </form>
