@@ -1390,6 +1390,29 @@ p { margin: 0 0 16px; }
   color: #000;
 }
 
+.square-buy-embed {
+  margin-top: 8px;
+}
+
+.square-buy-embed a {
+  display: inline-block;
+  width: 100%;
+  font-size: 1rem;
+  line-height: 48px;
+  height: 48px;
+  color: #ffffff;
+  background-color: #006aff;
+  text-align: center;
+  border-radius: 6px;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.1) inset;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.square-buy-embed a:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 106, 255, 0.3);
+}
+
 /* Mat Demo */
 .mat-features {
   display: flex;
