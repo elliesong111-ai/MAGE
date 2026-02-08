@@ -235,8 +235,11 @@
   <!-- Card Magic Section -->
   <section class="section magic-section" id="magic">
     <h2 class="section-title">Card Magic · Pick a card</h2>
-    <p class="section-sub">The same feel you get at the table — online. Click below, pick any card, and we'll reveal it.</p>
-    <button class="cta cta-primary magic-trigger">Pick a card, any card</button>
+    <p class="section-sub">The same feel you get at the table — online. Try the classic 21-card mind read or the Binary Oracle.</p>
+    <div class="hero-cta">
+      <button class="cta cta-primary magic-trigger">21-Card Mind Read</button>
+      <button class="cta cta-secondary magic-binary-trigger">Binary Oracle Trick</button>
+    </div>
   </section>
 
   <!-- Story Section -->
@@ -366,6 +369,17 @@
       <button class="close magic-modal-close" aria-label="Close">&times;</button>
       <h2 id="magicModalTitle" class="sr-only">Card Magic Trick</h2>
       <div id="magicContent">
+        <!-- Content dynamically rendered by JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Magic Modal - Binary Oracle -->
+  <div class="modal" id="magicBinaryModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="magicBinaryModalTitle">
+    <div class="modal-content magic-modal-content">
+      <button class="close magic-binary-modal-close" aria-label="Close">&times;</button>
+      <h2 id="magicBinaryModalTitle" class="sr-only">Binary Oracle Trick</h2>
+      <div id="magicBinaryContent">
         <!-- Content dynamically rendered by JavaScript -->
       </div>
     </div>
