@@ -41,9 +41,9 @@ body {
   height: 44px;
   width: 44px;
   display: block;
-  border-radius: 50%;
   object-fit: contain;
   transition: transform 0.3s ease;
+  filter: invert(1);
 }
 .nav-logo:hover .logo-svg { transform: scale(1.05); }
 .footer-logo {
@@ -51,9 +51,9 @@ body {
   width: 56px;
   display: block;
   margin: 0 auto 12px;
-  border-radius: 50%;
   object-fit: contain;
   opacity: 0.95;
+  filter: invert(1);
 }
 .nav-links {
   list-style: none;
@@ -201,18 +201,18 @@ body {
   z-index: 1;
   width: clamp(180px, 35vw, 320px);
   height: auto;
-  filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,255,255,0.5)) drop-shadow(0 0 80px rgba(255,255,255,0.3));
+  filter: invert(1) drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,255,255,0.5)) drop-shadow(0 0 80px rgba(255,255,255,0.3));
   animation: tapLogoPulse 1.2s ease-in-out infinite;
   transition: transform 0.25s ease, filter 0.25s ease;
   margin-bottom: 20px;
 }
 @keyframes tapLogoPulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,255,255,0.5)); }
-  50% { transform: scale(1.04); filter: drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(255,255,255,0.7)); }
+  0%, 100% { transform: scale(1); filter: invert(1) drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,255,255,0.5)); }
+  50% { transform: scale(1.04); filter: invert(1) drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(255,255,255,0.7)); }
 }
 .hero-tap-overlay:hover .hero-tap-logo {
   transform: scale(1.08);
-  filter: drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(255,255,255,0.8)) drop-shadow(0 0 100px rgba(255,255,255,0.5));
+  filter: invert(1) drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(255,255,255,0.8)) drop-shadow(0 0 100px rgba(255,255,255,0.5));
 }
 .hero-tap-text {
   position: relative;
@@ -401,8 +401,8 @@ body {
   display: block;
   width: clamp(140px, 28vw, 220px);
   height: auto;
-  border-radius: 50%;
   animation: none;
+  filter: invert(1);
 }
 .hero-started .hero-logo {
   animation: logoLand 0.4s ease-out 1.8s both, logoPulse 4s ease-in-out 2.5s infinite;
@@ -717,7 +717,7 @@ body {
   width: clamp(80px, 15vw, 140px);
   height: auto;
   opacity: 0.15;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+  filter: invert(1) drop-shadow(0 0 10px rgba(255,255,255,0.1));
 }
 .on-mat-action {
   position: relative;
