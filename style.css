@@ -711,12 +711,13 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 5vw, 3rem);
-  font-weight: 700;
-  color: rgba(255,255,255,0.06);
-  letter-spacing: 0.15em;
   pointer-events: none;
+}
+.mat-emblem-logo {
+  width: clamp(80px, 15vw, 140px);
+  height: auto;
+  opacity: 0.15;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
 }
 .on-mat-action {
   position: relative;
