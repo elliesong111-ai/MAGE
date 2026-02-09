@@ -4,6 +4,411 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[track]', eventName, params);
   }
 
+  // =====================================================
+  // MAGIC PARTICLE SYSTEM
+  // =====================================================
+
+  // Create particle container
+  const particleContainer = document.createElement('div');
+  particleContainer.className = 'particle-container';
+  document.body.appendChild(particleContainer);
+
+  // Create background stars
+  const bgStars = document.createElement('div');
+  bgStars.className = 'bg-stars';
+  document.body.appendChild(bgStars);
+
+  function createBackgroundStars() {
+    const symbols = ['✦', '✧', '★', '☆', '✴', '✵'];
+    for (let i = 0; i < 30; i++) {
+      const star = document.createElement('span');
+      star.className = 'bg-star';
+      star.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 8 + 's';
+      star.style.animationDuration = (6 + Math.random() * 4) + 's';
+      star.style.fontSize = (6 + Math.random() * 8) + 'px';
+      bgStars.appendChild(star);
+    }
+  }
+  createBackgroundStars();
+
+  // Particle burst on button click
+  function createParticleBurst(x, y, count = 12) {
+    const colors = ['#8b5cf6', '#fbbf24', '#ec4899', '#10b981', '#3b82f6'];
+    const symbols = ['✦', '✧', '★', '♠', '♥', '♣', '♦'];
+    
+    for (let i = 0; i < count; i++) {
+      const particle = document.createElement('div');
+      const isSymbol = Math.random() > 0.5;
+      
+      if (isSymbol) {
+        particle.className = 'particle particle-star';
+        particle.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+        particle.style.color = colors[Math.floor(Math.random() * colors.length)];
+      } else {
+        particle.className = 'particle particle-spark';
+      }
+      
+      const angle = (Math.PI * 2 * i) / count;
+      const distance = 50 + Math.random() * 100;
+      const tx = Math.cos(angle) * distance;
+      const ty = Math.sin(angle) * distance;
+      
+      particle.style.left = x + 'px';
+      particle.style.top = y + 'px';
+      particle.style.setProperty('--tx', tx + 'px');
+      particle.style.setProperty('--ty', ty + 'px');
+      particle.style.animationDelay = (Math.random() * 0.1) + 's';
+      
+      particleContainer.appendChild(particle);
+      setTimeout(() => particle.remove(), 1200);
+    }
+  }
+
+  // Golden rain effect for magic reveal
+  function createGoldenRain(container) {
+    const rainContainer = document.createElement('div');
+    rainContainer.className = 'golden-rain';
+    container.appendChild(rainContainer);
+
+    for (let i = 0; i < 50; i++) {
+      setTimeout(() => {
+        const particle = document.createElement('div');
+        particle.className = 'gold-particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 0.5 + 's';
+        particle.style.animationDuration = (1.5 + Math.random()) + 's';
+        rainContainer.appendChild(particle);
+        setTimeout(() => particle.remove(), 3000);
+      }, i * 40);
+    }
+
+    setTimeout(() => rainContainer.remove(), 5000);
+  }
+
+  // Confetti burst
+  function createConfetti(x, y, count = 30) {
+    const colors = ['#8b5cf6', '#fbbf24', '#ec4899', '#10b981', '#3b82f6', '#ef4444', '#06b6d4'];
+    
+    for (let i = 0; i < count; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.left = x + (Math.random() - 0.5) * 100 + 'px';
+      confetti.style.top = y + 'px';
+      confetti.style.width = (5 + Math.random() * 10) + 'px';
+      confetti.style.height = (5 + Math.random() * 10) + 'px';
+      confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+      confetti.style.animationDelay = Math.random() * 0.3 + 's';
+      confetti.style.animationDuration = (2 + Math.random()) + 's';
+      
+      particleContainer.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 3500);
+    }
+  }
+
+  // Sparkle trail on mouse move (optional, can be toggled)
+  let sparkleTrailEnabled = false;
+  let lastSparkleTime = 0;
+  
+  document.addEventListener('mousemove', (e) => {
+    if (!sparkleTrailEnabled) return;
+    const now = Date.now();
+    if (now - lastSparkleTime < 50) return;
+    lastSparkleTime = now;
+
+    const sparkle = document.createElement('div');
+    sparkle.className = 'sparkle-trail';
+    sparkle.style.left = e.clientX + 'px';
+    sparkle.style.top = e.clientY + 'px';
+    document.body.appendChild(sparkle);
+    setTimeout(() => sparkle.remove(), 500);
+  });
+
+  // Add particle burst to all CTA buttons
+  document.querySelectorAll('.cta, .btn-add, .magic-btn').forEach(btn => {
+    btn.classList.add('btn-ripple');
+    btn.addEventListener('click', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+      createParticleBurst(x, y, 8);
+    });
+  });
+
+  // Export functions for use in magic trick
+  window.MageParticles = {
+    burst: createParticleBurst,
+    goldenRain: createGoldenRain,
+    confetti: createConfetti,
+    toggleSparkleTrail: () => { sparkleTrailEnabled = !sparkleTrailEnabled; }
+  };
+
+  // =====================================================
+  // SCROLL-TRIGGERED ANIMATIONS
+  // =====================================================
+
+  // Elements to animate on scroll
+  const animateElements = [
+    { selector: '.section-title', class: 'visible' },
+    { selector: '.section-sub', class: 'visible', delay: 100 },
+    { selector: '.product-grid', class: 'visible' },
+    { selector: '.mat-features', class: 'visible' },
+    { selector: '.story-content', class: 'visible' },
+    { selector: '.community', class: 'visible' },
+    { selector: '.testimonials', class: 'visible' },
+    { selector: '.checkout-grid', class: 'visible' },
+    { selector: '.mat-demo', class: 'visible' }
+  ];
+
+  // Add initial animation classes
+  document.querySelectorAll('.section-title').forEach(el => el.classList.add('fade-up'));
+  document.querySelectorAll('.section-sub').forEach(el => el.classList.add('fade-up'));
+  document.querySelectorAll('.story-content').forEach(el => el.classList.add('slide-left'));
+  document.querySelectorAll('.community').forEach(el => el.classList.add('slide-right'));
+  document.querySelectorAll('.testimonials').forEach(el => el.classList.add('fade-scale'));
+  document.querySelectorAll('.checkout-grid').forEach(el => el.classList.add('fade-up'));
+  document.querySelectorAll('.mat-demo').forEach(el => el.classList.add('zoom-in'));
+
+  // Intersection Observer for scroll animations
+  const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const delay = entry.target.dataset.scrollDelay || 0;
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, parseInt(delay));
+        
+        // Unobserve after animation (one-time animation)
+        scrollObserver.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.15,
+    rootMargin: '0px 0px -50px 0px'
+  });
+
+  // Observe all animated elements
+  animateElements.forEach(({ selector, delay }) => {
+    document.querySelectorAll(selector).forEach(el => {
+      if (delay) el.dataset.scrollDelay = delay;
+      scrollObserver.observe(el);
+    });
+  });
+
+  // Also observe product grids
+  document.querySelectorAll('.product-grid').forEach(grid => {
+    scrollObserver.observe(grid);
+  });
+
+  document.querySelectorAll('.mat-features').forEach(features => {
+    scrollObserver.observe(features);
+  });
+
+  // Mat demo animation trigger
+  const matDemoEl = document.querySelector('.mat-demo');
+  if (matDemoEl) {
+    const matObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          matDemoEl.classList.add('mat-animate');
+        }
+      });
+    }, { threshold: 0.4 });
+    matObserver.observe(matDemoEl);
+    // Fallback: trigger once shortly after load
+    setTimeout(() => {
+      matDemoEl.classList.add('mat-animate');
+    }, 800);
+  }
+
+  // Count-up animation for numbers
+  function animateCountUp(element, target, duration = 1500) {
+    const start = 0;
+    const startTime = performance.now();
+    
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easeProgress = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const current = Math.floor(start + (target - start) * easeProgress);
+      
+      element.textContent = current;
+      
+      if (progress < 1) {
+        requestAnimationFrame(update);
+      } else {
+        element.textContent = target;
+      }
+    }
+    
+    requestAnimationFrame(update);
+  }
+
+  // Observe count-up elements
+  document.querySelectorAll('[data-count-target]').forEach(el => {
+    const countObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const target = parseInt(entry.target.dataset.countTarget);
+          animateCountUp(entry.target, target);
+          countObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+    
+    countObserver.observe(el);
+  });
+
+  // Parallax effect on scroll
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        
+        // Parallax for background stars
+        if (bgStars) {
+          bgStars.style.transform = `translateY(${scrollY * 0.3}px)`;
+        }
+        
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+
+  // =====================================================
+  // VIDEO BACKGROUND HANDLING
+  // =====================================================
+
+  const heroVideo = document.getElementById('heroVideo');
+  
+  if (heroVideo) {
+    // Handle video load
+    heroVideo.addEventListener('canplaythrough', () => {
+      hero?.classList.add('video-loaded');
+    });
+
+    // Handle video error - show gradient fallback
+    heroVideo.addEventListener('error', () => {
+      heroVideo.style.display = 'none';
+      console.log('Video failed to load, using gradient fallback');
+    });
+
+    // Pause video when not visible (performance optimization)
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          heroVideo.play().catch(() => {});
+        } else {
+          heroVideo.pause();
+        }
+      });
+    }, { threshold: 0.1 });
+
+    videoObserver.observe(heroVideo);
+
+    // Reduce video quality on slow connections
+    if (navigator.connection) {
+      const connection = navigator.connection;
+      if (connection.saveData || connection.effectiveType === 'slow-2g' || connection.effectiveType === '2g') {
+        heroVideo.style.display = 'none';
+        console.log('Slow connection detected, using gradient fallback');
+      }
+    }
+  }
+
+  // =====================================================
+  // SOUND EFFECTS SYSTEM
+  // =====================================================
+
+  // Sound manager with volume control
+  const SoundManager = {
+    enabled: true,
+    volume: 0.5,
+    sounds: {},
+    
+    // Preload sounds
+    preload(name, src) {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
+      audio.volume = this.volume;
+      this.sounds[name] = audio;
+      return audio;
+    },
+    
+    // Play sound
+    play(name) {
+      if (!this.enabled) return;
+      
+      let audio = this.sounds[name];
+      
+      // If sound not preloaded, try to create it
+      if (!audio) {
+        const srcMap = {
+          'shuffle': 'assets/shuffle.mp3',
+          'flip': 'assets/flip.mp3',
+          'magic': 'assets/magic.mp3',
+          'success': 'assets/success.mp3',
+          'click': 'assets/click.mp3',
+          'roll': 'assets/roll.mp3'
+        };
+        
+        if (srcMap[name]) {
+          audio = this.preload(name, srcMap[name]);
+        } else {
+          return;
+        }
+      }
+      
+      // Clone for overlapping sounds
+      const clone = audio.cloneNode();
+      clone.volume = this.volume;
+      clone.play().catch(() => {});
+    },
+    
+    // Set volume
+    setVolume(vol) {
+      this.volume = Math.max(0, Math.min(1, vol));
+      Object.values(this.sounds).forEach(audio => {
+        audio.volume = this.volume;
+      });
+    },
+    
+    // Toggle sound
+    toggle() {
+      this.enabled = !this.enabled;
+      return this.enabled;
+    }
+  };
+
+  // Preload common sounds
+  SoundManager.preload('roll', 'assets/roll.mp3');
+  
+  // Export SoundManager globally
+  window.MageSound = SoundManager;
+
+  // Create sound control button
+  function createSoundControl() {
+    const btn = document.createElement('button');
+    btn.className = 'sound-control';
+    btn.innerHTML = '🔊';
+    btn.title = 'Toggle Sound';
+    btn.setAttribute('aria-label', 'Toggle sound effects');
+    
+    btn.addEventListener('click', () => {
+      const enabled = SoundManager.toggle();
+      btn.innerHTML = enabled ? '🔊' : '🔇';
+      btn.title = enabled ? 'Sound On' : 'Sound Off';
+    });
+    
+    document.body.appendChild(btn);
+  }
+  createSoundControl();
+
   // ----- Cart (localStorage) -----
   function getCart() {
     try { return JSON.parse(localStorage.getItem('mage_cart') || '[]'); } catch (e) { return []; }
@@ -83,11 +488,13 @@ document.addEventListener('DOMContentLoaded', () => {
       startHero(e);
     }
   });
-  hero.addEventListener('click', (e) => {
-    if (e.target.closest('.hero-tap-overlay') || e.target.closest('a') || e.target.closest('button')) return;
-    if (hero.classList.contains('hero-started')) return;
-    startHero(e);
-  });
+  if (hero) {
+    hero.addEventListener('click', (e) => {
+      if (e.target.closest('.hero-tap-overlay') || e.target.closest('a') || e.target.closest('button')) return;
+      if (hero.classList.contains('hero-started')) return;
+      startHero(e);
+    });
+  }
 
   // Cursor-follow glow on overlay (before tap)
   if (heroTapOverlay && heroCursorGlow) {
@@ -101,8 +508,8 @@ document.addEventListener('DOMContentLoaded', () => {
     heroTapOverlay.addEventListener('mouseleave', () => { heroCursorGlow.style.opacity = '0'; });
   }
 
-  // Suits follow mouse (parallax) before tap — top, right, bottom, left
-  if (heroTapSuitsWrap) {
+  // Suits follow mouse (parallax) before tap
+  if (heroTapSuitsWrap && heroTapOverlay) {
     const suits = heroTapSuitsWrap.querySelectorAll('.hero-tap-suit');
     const baseTransforms = ['translate(-50%, -50%)', 'translate(50%, -50%)', 'translate(-50%, 50%)', 'translate(-50%, -50%)'];
     heroTapOverlay.addEventListener('mousemove', (e) => {
@@ -271,9 +678,9 @@ document.addEventListener('DOMContentLoaded', () => {
         cartItemsEl.innerHTML = '<p class="cart-empty">Cart is empty. Add items from Shop.</p>';
       } else {
         cartItemsEl.innerHTML = cart.map((item, index) =>
-          `<div class="cart-line" data-ts="${item.ts || ''}" data-index="${index}">
-            <button type="button" class="cart-dec" aria-label="Decrease quantity">−</button>
-            <span class="cart-line-text">${item.name} × ${item.qty} — $${(item.price * item.qty).toFixed(2)}</span>
+          `<div class="cart-line" data-ts="${item.ts}" data-index="${index}">
+            <button class="cart-dec" type="button">−</button>
+            <span>${item.name} × ${item.qty} — $${(item.price * item.qty).toFixed(2)}</span>
           </div>`
         ).join('');
       }
@@ -349,8 +756,61 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ----- Checkout form -----
-  // Backend API URL (update this after deploying to Render)
   const PAYMENT_API_URL = 'https://mage-payment-backend.onrender.com';
+
+  // Create payment loading overlay
+  function showPaymentLoading() {
+    const overlay = document.createElement('div');
+    overlay.className = 'payment-loading';
+    overlay.id = 'paymentLoading';
+    overlay.innerHTML = `
+      <div class="payment-loading-content">
+        <div class="payment-cards">
+          <span class="payment-card-anim">🎴</span>
+          <span class="payment-card-anim">🎴</span>
+          <span class="payment-card-anim">🎴</span>
+        </div>
+        <div class="payment-spinner"></div>
+        <div class="payment-loading-text">Processing your order...</div>
+        <div class="payment-loading-sub">Shuffling magic into your cart ✨</div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    
+    // Trigger particle effect
+    if (window.MageParticles) {
+      const rect = overlay.getBoundingClientRect();
+      window.MageParticles.burst(rect.width / 2, rect.height / 2, 20);
+    }
+    
+    return overlay;
+  }
+
+  function hidePaymentLoading() {
+    const overlay = document.getElementById('paymentLoading');
+    if (overlay) {
+      overlay.style.opacity = '0';
+      setTimeout(() => overlay.remove(), 300);
+    }
+  }
+
+  function showPaymentError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'payment-error';
+    errorDiv.innerHTML = `
+      <div class="payment-error-title">⚠️ Payment Error</div>
+      <div class="payment-error-message">${message}</div>
+    `;
+    
+    const checkoutForm = document.getElementById('checkoutForm');
+    const existingError = checkoutForm?.querySelector('.payment-error');
+    if (existingError) existingError.remove();
+    
+    checkoutForm?.appendChild(errorDiv);
+    
+    // Auto-remove after 10 seconds
+    setTimeout(() => errorDiv.remove(), 10000);
+  }
 
   const checkoutForm = document.getElementById('checkoutForm');
   if (checkoutForm) {
@@ -365,7 +825,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const placeOrderBtn = document.getElementById('placeOrderBtn');
       const originalText = placeOrderBtn ? placeOrderBtn.textContent : 'Place Order';
 
-      // Get form data
       const formData = new FormData(checkoutForm);
       const customer = {
         name: formData.get('name') || '',
@@ -373,7 +832,12 @@ document.addEventListener('DOMContentLoaded', () => {
         address: formData.get('address') || '',
       };
 
-      // Calculate shipping
+      // Validate required fields
+      if (!customer.name || !customer.email) {
+        showToast('Please fill in your name and email.');
+        return;
+      }
+
       const countrySelect = document.getElementById('country');
       const country = countrySelect ? countrySelect.value : '';
       let subtotal = 0;
@@ -384,13 +848,17 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (country && country !== '') shipping = 15;
 
       const giftWrapEl = document.getElementById('giftWrap');
-      const giftWrap = giftWrapEl ? giftWrapEl.checked : false;
+      const giftWrapChecked = giftWrapEl ? giftWrapEl.checked : false;
 
       // Show loading state
       if (placeOrderBtn) {
-        placeOrderBtn.textContent = 'Processing...';
+        placeOrderBtn.classList.add('loading');
+        placeOrderBtn.textContent = '';
         placeOrderBtn.disabled = true;
       }
+
+      // Show full-screen loading overlay
+      const loadingOverlay = showPaymentLoading();
 
       try {
         const response = await fetch(`${PAYMENT_API_URL}/create-checkout`, {
@@ -399,7 +867,7 @@ document.addEventListener('DOMContentLoaded', () => {
           body: JSON.stringify({
             cart: cart,
             shipping: shipping,
-            gift_wrap: giftWrap,
+            gift_wrap: giftWrapChecked,
             customer: customer,
           }),
         });
@@ -407,33 +875,47 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = await response.json();
 
         if (response.ok && data.checkout_url) {
-          // Clear cart and redirect to Square checkout
-          track('checkout_redirect', { total: subtotal + shipping + (giftWrap ? 5 : 0) });
-          window.location.href = data.checkout_url;
+          track('checkout_redirect', { total: subtotal + shipping + (giftWrapChecked ? 5 : 0) });
+          
+          // Play success sound
+          if (window.MageSound) window.MageSound.play('success');
+          
+          // Confetti celebration
+          if (window.MageParticles) {
+            window.MageParticles.confetti(window.innerWidth / 2, window.innerHeight / 2, 50);
+          }
+          
+          // Short delay before redirect for visual feedback
+          setTimeout(() => {
+            window.location.href = data.checkout_url;
+          }, 800);
         } else {
-          // Show error or fallback to manual payment modal
+          hidePaymentLoading();
           console.error('Checkout error:', data);
+          
+          const errorMessage = data.error || 'Payment system unavailable. Please try again or contact us.';
+          showPaymentError(errorMessage);
+          
           const paymentModal = document.getElementById('paymentModal');
           if (paymentModal) {
             paymentModal.style.display = 'flex';
             paymentModal.setAttribute('aria-hidden', 'false');
-          } else {
-            showToast('Payment system unavailable. Please contact us to complete your order.');
           }
         }
       } catch (err) {
+        hidePaymentLoading();
         console.error('Checkout fetch error:', err);
-        // Fallback to manual payment modal
+        
+        showPaymentError('Network error. Please check your connection and try again.');
+        
         const paymentModal = document.getElementById('paymentModal');
         if (paymentModal) {
           paymentModal.style.display = 'flex';
           paymentModal.setAttribute('aria-hidden', 'false');
-        } else {
-          showToast('Payment system unavailable. Please contact us to complete your order.');
         }
       } finally {
-        // Restore button state
         if (placeOrderBtn) {
+          placeOrderBtn.classList.remove('loading');
           placeOrderBtn.textContent = originalText;
           placeOrderBtn.disabled = false;
         }
@@ -442,6 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
       track('checkout_submit');
     });
   }
+
   const paymentModal = document.getElementById('paymentModal');
   const paymentClose = document.querySelector('.payment-close');
   const paymentOk = document.getElementById('paymentModalOk');
@@ -451,14 +934,25 @@ document.addEventListener('DOMContentLoaded', () => {
     paymentModal.addEventListener('click', (e) => { if (e.target === paymentModal) { paymentModal.style.display = 'none'; paymentModal.setAttribute('aria-hidden', 'true'); } });
   }
 
-  // ----- Card Magic: pick a card, reveal -----
+  // =====================================================
+  // SHARED CARD HELPERS
+  // =====================================================
   const VALUES = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-  const SUITS = [{ s: '♠', name: 'Spades', red: false }, { s: '♥', name: 'Hearts', red: true }, { s: '♣', name: 'Clubs', red: false }, { s: '♦', name: 'Diamonds', red: true }];
+  const SUITS = [
+    { s: '♠', name: 'Spades', red: false },
+    { s: '♥', name: 'Hearts', red: true },
+    { s: '♣', name: 'Clubs', red: false },
+    { s: '♦', name: 'Diamonds', red: true }
+  ];
   const VALUE_NAMES = { A: 'Ace', 2: 'Two', 3: 'Three', 4: 'Four', 5: 'Five', 6: 'Six', 7: 'Seven', 8: 'Eight', 9: 'Nine', 10: 'Ten', J: 'Jack', Q: 'Queen', K: 'King' };
 
-  function buildDeck() {
+  function buildFullDeck() {
     const deck = [];
-    for (const v of VALUES) for (const suit of SUITS) deck.push({ value: v, suit: suit.s, suitName: suit.name, red: suit.red });
+    for (const v of VALUES) {
+      for (const suit of SUITS) {
+        deck.push({ value: v, suit: suit.s, suitName: suit.name, red: suit.red });
+      }
+    }
     return deck;
   }
 
@@ -471,20 +965,620 @@ document.addEventListener('DOMContentLoaded', () => {
     return a;
   }
 
+  function getCardLabel(card) {
+    return `${VALUE_NAMES[card.value] || card.value} of ${card.suitName}`;
+  }
+
+  function getCardHTML(card, index) {
+    return `
+      <div class="magic-card-new ${card.red ? 'red' : ''}" data-index="${index}">
+        <div class="magic-card-inner">
+          <div class="magic-card-front-new">
+            <span class="corner top-left">
+              <span class="card-value">${card.value}</span>
+              <span class="card-suit-small">${card.suit}</span>
+            </span>
+            <span class="card-suit-center">${card.suit}</span>
+            <span class="corner bottom-right">
+              <span class="card-value">${card.value}</span>
+              <span class="card-suit-small">${card.suit}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderGrid(deck) {
+    return `
+      <div class="magic-grid">
+        ${deck.map((card, index) => `
+          <div class="magic-grid-cell" data-row="${Math.floor(index / 3)}" data-col="${index % 3}">
+            ${getCardHTML(card, index)}
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  // =====================================================
+  // MAGIC TRICK #1: The 21 Card Trick
+  // =====================================================
+  let magic21State = {
+    phase: 'intro',
+    deck: [],
+    round: 0,
+    userCard: null,
+  };
+
+  function dealIntoColumns21(deck) {
+    const columns = [[], [], []];
+    for (let i = 0; i < 21; i++) {
+      columns[i % 3].push(deck[i]);
+    }
+    return columns;
+  }
+
+  function collectCards21(columns, selectedCol) {
+    const newDeck = [];
+    const before = selectedCol === 0 ? 1 : 0;
+    const after = selectedCol === 2 ? 1 : 2;
+    for (const card of columns[before]) newDeck.push(card);
+    for (const card of columns[selectedCol]) newDeck.push(card);
+    for (const card of columns[after]) newDeck.push(card);
+    return newDeck;
+  }
+
+  function renderMagic21UI() {
+    const magicContent = document.getElementById('magicContent');
+    if (!magicContent) return;
+    switch (magic21State.phase) {
+      case 'intro':
+        render21Intro(magicContent);
+        break;
+      case 'memorize':
+        render21Memorize(magicContent);
+        break;
+      case 'round1':
+      case 'round2':
+      case 'round3':
+        render21Round(magicContent);
+        break;
+      case 'reveal':
+        render21Reveal(magicContent);
+        break;
+    }
+  }
+
+  function render21Intro(container) {
+    container.innerHTML = `
+      <div class="magic-intro">
+        <div class="magic-icon">🎴</div>
+        <h3>The Mind Reader</h3>
+        <p class="magic-subtitle">A classic card trick, digitized.</p>
+        <div class="magic-steps">
+          <div class="step"><span class="step-num">1</span><span>I'll show you 21 cards</span></div>
+          <div class="step"><span class="step-num">2</span><span>Pick one card in your mind</span></div>
+          <div class="step"><span class="step-num">3</span><span>Answer 3 simple questions</span></div>
+          <div class="step"><span class="step-num">4</span><span>I'll read your mind ✨</span></div>
+        </div>
+        <button class="magic-btn primary" id="startMagic21Btn">
+          <span>Begin the Magic</span>
+          <span class="btn-sparkle">✦</span>
+        </button>
+      </div>
+    `;
+
+    document.getElementById('startMagic21Btn').addEventListener('click', () => {
+      const fullDeck = shuffleDeck(buildFullDeck());
+      magic21State.deck = fullDeck.slice(0, 21);
+      magic21State.phase = 'memorize';
+      magic21State.round = 0;
+      renderMagic21UI();
+      playMagicSound('shuffle');
+    });
+  }
+
+  function render21Memorize(container) {
+    const columns = dealIntoColumns21(magic21State.deck);
+    container.innerHTML = `
+      <div class="magic-memorize">
+        <div class="magic-header">
+          <h3>Memorize One Card</h3>
+          <p>Look at the cards below. Pick <strong>ONE card</strong> in your mind and remember it.</p>
+          <p class="magic-hint">Don't tell me which one — just remember it!</p>
+        </div>
+        <div class="magic-columns-display">
+          ${columns.map((col, colIndex) => `
+            <div class="magic-column-cards">
+              ${col.map((card, i) => getCardHTML(card, colIndex * 7 + i)).join('')}
+            </div>
+          `).join('')}
+        </div>
+        <button class="magic-btn primary" id="cardMemorized21Btn">
+          <span>I've memorized my card</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+    `;
+
+    document.getElementById('cardMemorized21Btn').addEventListener('click', () => {
+      magic21State.phase = 'round1';
+      magic21State.round = 1;
+      renderMagic21UI();
+      playMagicSound('flip');
+    });
+  }
+
+  function render21Round(container) {
+    const columns = dealIntoColumns21(magic21State.deck);
+    const roundNum = magic21State.round;
+    const messages = [
+      "Which column contains your card?",
+      "I'm getting closer... which column now?",
+      "Final question — which column?"
+    ];
+    const hints = [
+      "Click the column that has your card",
+      "The magic is working...",
+      "Almost there..."
+    ];
+
+    container.innerHTML = `
+      <div class="magic-round">
+        <div class="magic-header">
+          <div class="round-indicator">
+            <span class="round-dot ${roundNum >= 1 ? 'active' : ''}"></span>
+            <span class="round-dot ${roundNum >= 2 ? 'active' : ''}"></span>
+            <span class="round-dot ${roundNum >= 3 ? 'active' : ''}"></span>
+          </div>
+          <h3>${messages[roundNum - 1]}</h3>
+          <p class="magic-hint">${hints[roundNum - 1]}</p>
+        </div>
+        <div class="magic-columns-selectable">
+          ${columns.map((col, colIndex) => `
+            <div class="magic-column-select" data-column="${colIndex}">
+              <div class="column-label">Column ${colIndex + 1}</div>
+              <div class="magic-column-cards">
+                ${col.map((card, i) => getCardHTML(card, colIndex * 7 + i)).join('')}
+              </div>
+              <button class="column-select-btn" data-column="${colIndex}">
+                <span>This column</span>
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+
+    container.querySelectorAll('.column-select-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const col = parseInt(e.currentTarget.dataset.column, 10);
+        select21Column(col);
+      });
+    });
+
+    container.querySelectorAll('.magic-column-select').forEach(colEl => {
+      colEl.addEventListener('click', (e) => {
+        if (e.target.closest('.column-select-btn')) return;
+        const col = parseInt(colEl.dataset.column, 10);
+        select21Column(col);
+      });
+    });
+  }
+
+  function select21Column(colIndex) {
+    const columns = dealIntoColumns21(magic21State.deck);
+    magic21State.deck = collectCards21(columns, colIndex);
+    magic21State.round++;
+    playMagicSound('shuffle');
+
+    if (magic21State.round > 3) {
+      magic21State.phase = 'reveal';
+      magic21State.userCard = magic21State.deck[10];
+      const magicContent = document.getElementById('magicContent');
+      magicContent.innerHTML = `
+        <div class="magic-thinking">
+          <div class="thinking-animation">
+            <div class="thinking-cards">
+              <div class="floating-card">🎴</div>
+              <div class="floating-card delay-1">🎴</div>
+              <div class="floating-card delay-2">🎴</div>
+            </div>
+            <div class="thinking-text">Reading your mind...</div>
+          </div>
+        </div>
+      `;
+      setTimeout(() => {
+        renderMagic21UI();
+        playMagicSound('magic');
+      }, 2500);
+    } else {
+      magic21State.phase = `round${magic21State.round}`;
+      renderMagic21UI();
+    }
+  }
+
+  function render21Reveal(container) {
+    const card = magic21State.userCard;
+    const label = getCardLabel(card);
+    container.innerHTML = `
+      <div class="magic-reveal-section">
+        <div class="reveal-dramatic">
+          <div class="magic-sparkles">
+            <span class="sparkle s1">✦</span>
+            <span class="sparkle s2">✧</span>
+            <span class="sparkle s3">✦</span>
+            <span class="sparkle s4">✧</span>
+            <span class="sparkle s5">✦</span>
+          </div>
+          <h3>Your card is...</h3>
+        </div>
+        
+        <div class="reveal-card-container">
+          <div class="reveal-card ${card.red ? 'red' : ''}">
+            <div class="reveal-card-inner">
+              <span class="corner top-left">
+                <span class="card-value">${card.value}</span>
+                <span class="card-suit-small">${card.suit}</span>
+              </span>
+              <span class="card-suit-center large">${card.suit}</span>
+              <span class="corner bottom-right">
+                <span class="card-value">${card.value}</span>
+                <span class="card-suit-small">${card.suit}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="reveal-label">${label}</div>
+        
+        <div class="reveal-reaction">
+          <p>Was I right? ✨</p>
+        </div>
+        
+        <div class="reveal-actions">
+          <button class="magic-btn secondary" id="howItWorks21Btn">
+            <span>How did you do that?</span>
+          </button>
+          <button class="magic-btn primary" id="tryAgain21Btn">
+            <span>Try Again</span>
+            <span class="btn-sparkle">✦</span>
+          </button>
+        </div>
+        
+        <div class="magic-explanation" id="magicExplanation21" style="display: none;">
+          <div class="explanation-content">
+            <h4>The Secret ✨</h4>
+            <p>This is the classic <strong>21 Card Trick</strong>, a mathematical magic trick that always works!</p>
+            <p>When you deal 21 cards into 3 columns of 7 and pick up the chosen column in the middle, repeating 3 times, the card always ends up in position 11 (the exact middle).</p>
+            <p class="explanation-note">Now you can perform this trick with a real deck! 🎴</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      container.querySelector('.reveal-card-container')?.classList.add('revealed');
+      if (window.MageParticles) {
+        const revealCard = container.querySelector('.reveal-card-container');
+        if (revealCard) {
+          const rect = revealCard.getBoundingClientRect();
+          window.MageParticles.confetti(rect.left + rect.width / 2, rect.top, 40);
+        }
+        window.MageParticles.goldenRain(container);
+      }
+    }, 100);
+
+    document.getElementById('tryAgain21Btn').addEventListener('click', () => {
+      resetMagic21();
+    });
+
+    document.getElementById('howItWorks21Btn').addEventListener('click', (e) => {
+      const explanation = document.getElementById('magicExplanation21');
+      if (explanation) {
+        explanation.style.display = explanation.style.display === 'none' ? 'block' : 'none';
+        e.currentTarget.querySelector('span').textContent = explanation.style.display === 'none' ? 'How did you do that?' : 'Hide explanation';
+      }
+    });
+  }
+
+  function resetMagic21() {
+    magic21State = {
+      phase: 'intro',
+      deck: [],
+      round: 0,
+      userCard: null,
+    };
+    renderMagic21UI();
+    playMagicSound('shuffle');
+  }
+
+  // =====================================================
+  // MAGIC TRICK #2: Binary Oracle (8-card yes/no)
+  // =====================================================
+  let binaryMagicState = {
+    phase: 'intro',
+    deck: [],
+    answers: [0, 0, 0],
+    step: 0,
+    userCard: null,
+  };
+
+  function renderBinaryMagicUI() {
+    const binaryContent = document.getElementById('magicBinaryContent');
+    if (!binaryContent) return;
+
+    switch (binaryMagicState.phase) {
+      case 'intro':
+        renderBinaryIntro(binaryContent);
+        break;
+      case 'memorize':
+        renderBinaryMemorize(binaryContent);
+        break;
+      case 'q1':
+      case 'q2':
+      case 'q3':
+        renderBinaryQuestion(binaryContent);
+        break;
+      case 'reveal':
+        renderBinaryReveal(binaryContent);
+        break;
+    }
+  }
+
+  function renderBinaryIntro(container) {
+    container.innerHTML = `
+      <div class="magic-intro">
+        <div class="magic-icon">🪄</div>
+        <h3>Binary Oracle</h3>
+        <p class="magic-subtitle">Three questions. One perfect reveal.</p>
+        <div class="magic-steps">
+          <div class="step"><span class="step-num">1</span><span>I'll show you 8 cards</span></div>
+          <div class="step"><span class="step-num">2</span><span>Pick one card in your mind</span></div>
+          <div class="step"><span class="step-num">3</span><span>Answer 3 yes/no questions</span></div>
+          <div class="step"><span class="step-num">4</span><span>I'll reveal it ✨</span></div>
+        </div>
+        <button class="magic-btn primary" id="startBinaryMagicBtn">
+          <span>Begin the Magic</span>
+          <span class="btn-sparkle">✦</span>
+        </button>
+      </div>
+    `;
+
+    document.getElementById('startBinaryMagicBtn').addEventListener('click', () => {
+      const fullDeck = shuffleDeck(buildFullDeck());
+      binaryMagicState.deck = fullDeck.slice(0, 8);
+      binaryMagicState.answers = [0, 0, 0];
+      binaryMagicState.step = 0;
+      binaryMagicState.phase = 'memorize';
+      renderBinaryMagicUI();
+      playMagicSound('shuffle');
+    });
+  }
+
+  function renderBinaryMemorize(container) {
+    container.innerHTML = `
+      <div class="magic-memorize">
+        <div class="magic-header">
+          <h3>Memorize One Card</h3>
+          <p>Pick <strong>ONE card</strong> and remember it.</p>
+          <p class="magic-hint">You'll answer 3 yes/no questions next.</p>
+        </div>
+        <div class="magic-binary-grid">
+          ${binaryMagicState.deck.map((card, index) => `
+            <div class="magic-grid-cell" data-index="${index}">
+              ${getCardHTML(card, index)}
+            </div>
+          `).join('')}
+        </div>
+        <button class="magic-btn primary" id="binaryMemorizedBtn">
+          <span>I'm ready</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+    `;
+
+    document.getElementById('binaryMemorizedBtn').addEventListener('click', () => {
+      binaryMagicState.phase = 'q1';
+      binaryMagicState.step = 0;
+      renderBinaryMagicUI();
+      playMagicSound('flip');
+    });
+  }
+
+  function getBinarySetCards(step) {
+    return binaryMagicState.deck.filter((_, index) => (index & (1 << step)) !== 0);
+  }
+
+  function renderBinaryQuestion(container) {
+    const step = binaryMagicState.step;
+    const cards = getBinarySetCards(step);
+    const prompts = [
+      'Question 1: Is your card in this group?',
+      'Question 2: Do you see your card here?',
+      'Question 3: Final check — is it in this group?'
+    ];
+
+    container.innerHTML = `
+      <div class="magic-round">
+        <div class="magic-header">
+          <h3>${prompts[step]}</h3>
+          <p class="magic-hint">Answer yes or no</p>
+        </div>
+        <div class="magic-binary-grid">
+          ${cards.map((card, index) => `
+            <div class="magic-grid-cell">
+              ${getCardHTML(card, index)}
+            </div>
+          `).join('')}
+        </div>
+        <div class="binary-buttons">
+          <button class="magic-btn primary binary-yes">Yes</button>
+          <button class="magic-btn secondary binary-no">No</button>
+        </div>
+      </div>
+    `;
+
+    container.querySelector('.binary-yes').addEventListener('click', () => handleBinaryAnswer(1));
+    container.querySelector('.binary-no').addEventListener('click', () => handleBinaryAnswer(0));
+  }
+
+  function handleBinaryAnswer(answer) {
+    binaryMagicState.answers[binaryMagicState.step] = answer;
+    playMagicSound('shuffle');
+
+    if (binaryMagicState.step < 2) {
+      binaryMagicState.step += 1;
+      binaryMagicState.phase = `q${binaryMagicState.step + 1}`;
+      renderBinaryMagicUI();
+      return;
+    }
+
+    const number = (binaryMagicState.answers[0] << 0) +
+      (binaryMagicState.answers[1] << 1) +
+      (binaryMagicState.answers[2] << 2);
+    binaryMagicState.userCard = binaryMagicState.deck[number];
+    binaryMagicState.phase = 'reveal';
+
+    const binaryContent = document.getElementById('magicBinaryContent');
+    binaryContent.innerHTML = `
+      <div class="magic-thinking">
+        <div class="thinking-animation">
+          <div class="thinking-cards">
+            <div class="floating-card">🎴</div>
+            <div class="floating-card delay-1">🎴</div>
+            <div class="floating-card delay-2">🎴</div>
+          </div>
+          <div class="thinking-text">Decoding the oracle...</div>
+        </div>
+      </div>
+    `;
+
+    playMagicSound('magic');
+    setTimeout(() => {
+      renderBinaryMagicUI();
+      playMagicSound('magic');
+    }, 1400);
+  }
+
+  function renderBinaryReveal(container) {
+    const card = binaryMagicState.userCard;
+    const label = getCardLabel(card);
+    container.innerHTML = `
+      <div class="magic-reveal-section">
+        <div class="reveal-dramatic">
+          <div class="magic-sparkles">
+            <span class="sparkle s1">✦</span>
+            <span class="sparkle s2">✧</span>
+            <span class="sparkle s3">✦</span>
+            <span class="sparkle s4">✧</span>
+            <span class="sparkle s5">✦</span>
+          </div>
+          <h3>Your card is...</h3>
+        </div>
+        
+        <div class="reveal-card-container">
+          <div class="reveal-card ${card.red ? 'red' : ''}">
+            <div class="reveal-card-inner">
+              <span class="corner top-left">
+                <span class="card-value">${card.value}</span>
+                <span class="card-suit-small">${card.suit}</span>
+              </span>
+              <span class="card-suit-center large">${card.suit}</span>
+              <span class="corner bottom-right">
+                <span class="card-value">${card.value}</span>
+                <span class="card-suit-small">${card.suit}</span>
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="reveal-label">${label}</div>
+        
+        <div class="reveal-reaction">
+          <p>Was I right? ✨</p>
+        </div>
+        
+        <div class="reveal-actions">
+          <button class="magic-btn secondary" id="howItWorksBinaryBtn">
+            <span>How did you do that?</span>
+          </button>
+          <button class="magic-btn primary" id="tryAgainBinaryBtn">
+            <span>Try Again</span>
+            <span class="btn-sparkle">✦</span>
+          </button>
+        </div>
+        
+        <div class="magic-explanation" id="magicExplanationBinary" style="display: none;">
+          <div class="explanation-content">
+            <h4>The Secret ✨</h4>
+            <p>This uses a <strong>binary pattern</strong>. Each yes/no answer flips a bit.</p>
+            <p>Three answers create a number from 0–7, which maps to the exact card position.</p>
+            <p class="explanation-note">It feels like mind-reading — but it's pure math. 🎴</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      container.querySelector('.reveal-card-container')?.classList.add('revealed');
+      if (window.MageParticles) {
+        const revealCard = container.querySelector('.reveal-card-container');
+        if (revealCard) {
+          const rect = revealCard.getBoundingClientRect();
+          window.MageParticles.confetti(rect.left + rect.width / 2, rect.top, 40);
+        }
+        window.MageParticles.goldenRain(container);
+      }
+    }, 100);
+
+    document.getElementById('tryAgainBinaryBtn').addEventListener('click', () => {
+      resetBinaryMagic();
+    });
+
+    document.getElementById('howItWorksBinaryBtn').addEventListener('click', (e) => {
+      const explanation = document.getElementById('magicExplanationBinary');
+      if (explanation) {
+        explanation.style.display = explanation.style.display === 'none' ? 'block' : 'none';
+        e.currentTarget.querySelector('span').textContent = explanation.style.display === 'none' ? 'How did you do that?' : 'Hide explanation';
+      }
+    });
+  }
+
+  function resetBinaryMagic() {
+    binaryMagicState = {
+      phase: 'intro',
+      deck: [],
+      answers: [0, 0, 0],
+      step: 0,
+      userCard: null,
+    };
+    renderBinaryMagicUI();
+    playMagicSound('shuffle');
+  }
+
+  function playMagicSound(type = 'flip') {
+    try {
+      if (window.MageSound) {
+        window.MageSound.play(type);
+      } else {
+        const audio = new Audio('assets/roll.mp3');
+        audio.volume = 0.3;
+        audio.play().catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  // Magic Modal controls (21-card trick)
   const magicModal = document.getElementById('magicModal');
-  const magicCards = document.getElementById('magicCards');
-  const magicReveal = document.getElementById('magicReveal');
-  const magicRevealCard = document.getElementById('magicRevealCard');
-  const magicPickAgain = document.getElementById('magicPickAgain');
   const magicModalClose = document.querySelector('.magic-modal-close');
-  const magicAudio = new Audio('assets/roll.mp3');
 
   function openMagicModal() {
     if (!magicModal) return;
     magicModal.style.display = 'flex';
     magicModal.setAttribute('aria-hidden', 'false');
-    shuffleMagicCards();
-    if (magicReveal) magicReveal.classList.remove('visible');
+    resetMagic21();
     track('magic_modal_open');
   }
 
@@ -495,52 +1589,60 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function shuffleMagicCards() {
-    if (!magicCards) return;
-    const deck = shuffleDeck(buildDeck());
-    const five = deck.slice(0, 5);
-    const cards = magicCards.querySelectorAll('.magic-card');
-    cards.forEach((el, i) => {
-      el.classList.remove('flipped');
-      const card = five[i];
-      const valueEl = el.querySelector('.magic-value');
-      const suitEl = el.querySelector('.magic-suit');
-      const front = el.querySelector('.magic-card-front');
-      if (valueEl) valueEl.textContent = card.value;
-      if (suitEl) suitEl.textContent = card.suit;
-      if (front) front.classList.toggle('red', card.red);
-      el.dataset.value = card.value;
-      el.dataset.suitName = card.suitName;
-      el.dataset.red = card.red ? '1' : '0';
-    });
-  }
-
-  function onMagicCardClick(el) {
-    if (el.classList.contains('flipped')) return;
-    el.classList.add('flipped');
-    const value = el.dataset.value;
-    const suitName = el.dataset.suitName || '';
-    const label = `${VALUE_NAMES[value] || value} of ${suitName}`;
-    if (magicRevealCard) magicRevealCard.textContent = label;
-    if (magicReveal) magicReveal.classList.add('visible');
-    try { magicAudio.currentTime = 0; magicAudio.play().catch(() => {}); } catch (e) {}
-    track('magic_card_reveal', { card: label });
-  }
-
   document.querySelectorAll('.magic-trigger').forEach(btn => {
     btn.addEventListener('click', openMagicModal);
   });
-  if (magicModalClose) magicModalClose.addEventListener('click', closeMagicModal);
+
+  if (magicModalClose) {
+    magicModalClose.addEventListener('click', closeMagicModal);
+  }
+
   if (magicModal) {
-    magicModal.addEventListener('click', (e) => { if (e.target === magicModal) closeMagicModal(); });
+    magicModal.addEventListener('click', (e) => {
+      if (e.target === magicModal) closeMagicModal();
+    });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && magicModal.getAttribute('aria-hidden') === 'false') closeMagicModal();
+      if (e.key === 'Escape' && magicModal.getAttribute('aria-hidden') === 'false') {
+        closeMagicModal();
+      }
     });
   }
-  if (magicPickAgain) magicPickAgain.addEventListener('click', () => { shuffleMagicCards(); if (magicReveal) magicReveal.classList.remove('visible'); });
-  if (magicCards) {
-    magicCards.querySelectorAll('.magic-card').forEach(cardEl => {
-      cardEl.addEventListener('click', () => onMagicCardClick(cardEl));
+
+  // Magic Binary Modal controls
+  const magicBinaryModal = document.getElementById('magicBinaryModal');
+  const magicBinaryModalClose = document.querySelector('.magic-binary-modal-close');
+
+  function openMagicBinaryModal() {
+    if (!magicBinaryModal) return;
+    magicBinaryModal.style.display = 'flex';
+    magicBinaryModal.setAttribute('aria-hidden', 'false');
+    resetBinaryMagic();
+    track('magic_binary_modal_open');
+  }
+
+  function closeMagicBinaryModal() {
+    if (magicBinaryModal) {
+      magicBinaryModal.style.display = 'none';
+      magicBinaryModal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  document.querySelectorAll('.magic-binary-trigger').forEach(btn => {
+    btn.addEventListener('click', openMagicBinaryModal);
+  });
+
+  if (magicBinaryModalClose) {
+    magicBinaryModalClose.addEventListener('click', closeMagicBinaryModal);
+  }
+
+  if (magicBinaryModal) {
+    magicBinaryModal.addEventListener('click', (e) => {
+      if (e.target === magicBinaryModal) closeMagicBinaryModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && magicBinaryModal.getAttribute('aria-hidden') === 'false') {
+        closeMagicBinaryModal();
+      }
     });
   }
 });
