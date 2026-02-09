@@ -1,4 +1,4 @@
-/* MAGE — Where Magic Meets the Table */
+/* MVGE — Where Magic Meets the Table */
 /* Match logo: pure black + white, hand-drawn / graffiti feel */
 
 :root {
@@ -1209,7 +1209,7 @@ body {
   border: 2px solid rgba(255,255,255,0.2);
 }
 .magic-card-back::before {
-  content: "MAGE";
+  content: "MVGE";
   font-family: var(--font-display);
   font-size: 0.9rem;
   font-weight: 700;
