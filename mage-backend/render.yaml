@@ -11,3 +11,9 @@ services:
         sync: false
       - key: SQUARE_ENVIRONMENT
         value: sandbox
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+      - key: PAYPAL_ENVIRONMENT
+        value: sandbox

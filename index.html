@@ -132,7 +132,10 @@
               <p class="product-desc">A workhorse deck tuned for magic and cardistry. Smooth yet controlled finish, black-and-gold back that glows under light.</p>
               <p class="magician-quote">"Best feel for flourishes—not too slippery, not too stiff." — Campus Magician</p>
               <p class="product-price">$10</p>
-              <button type="button" class="btn-add" data-sku="signature" data-name="Signature Deck" data-price="10">Add to Order</button>
+              <div class="product-actions">
+                <button type="button" class="btn-add" data-sku="signature" data-name="Signature Deck" data-price="10">Add to Cart</button>
+                <button type="button" class="btn-buy-now" data-sku="signature" data-name="Signature Deck" data-price="10">Buy Now</button>
+              </div>
             </div>
           </article>
           <article class="product-card" data-product="phantom">
@@ -148,7 +151,10 @@
               <p class="product-desc">Deep black stock with subtle purple and gold. Flowing light bands when you fan or spring the cards.</p>
               <p class="magician-quote">"Low-light rooms and late-night games—this deck shines." — Magic Club</p>
               <p class="product-price">$10</p>
-              <button type="button" class="btn-add" data-sku="phantom" data-name="Phantom Deck" data-price="10">Add to Order</button>
+              <div class="product-actions">
+                <button type="button" class="btn-add" data-sku="phantom" data-name="Phantom Deck" data-price="10">Add to Cart</button>
+                <button type="button" class="btn-buy-now" data-sku="phantom" data-name="Phantom Deck" data-price="10">Buy Now</button>
+              </div>
             </div>
           </article>
         </div>
@@ -168,7 +174,10 @@
               <p class="product-spec">Size: 70cm × 40cm</p>
               <p class="magician-quote">"Every game felt more serious—in the best way." — Babson Player</p>
               <p class="product-price">$39</p>
-              <button type="button" class="btn-add" data-sku="campus-mat" data-name="Campus Portable Card Game Mat" data-price="39">Add to Order</button>
+              <div class="product-actions">
+                <button type="button" class="btn-add" data-sku="campus-mat" data-name="Campus Portable Card Game Mat" data-price="39">Add to Cart</button>
+                <button type="button" class="btn-buy-now" data-sku="campus-mat" data-name="Campus Portable Card Game Mat" data-price="39">Buy Now</button>
+              </div>
             </div>
           </article>
           <article class="product-card mat-card" data-product="night-raid">
@@ -182,7 +191,10 @@
               <p class="product-spec">Size: 90cm × 45cm</p>
               <p class="magician-quote">"When you put this on the table, everyone asks where it's from." — Game Night Host</p>
               <p class="product-price">$49</p>
-              <button type="button" class="btn-add" data-sku="night-raid-mat" data-name="Night Raid Portable Card Game Mat" data-price="49">Add to Order</button>
+              <div class="product-actions">
+                <button type="button" class="btn-add" data-sku="night-raid-mat" data-name="Night Raid Portable Card Game Mat" data-price="49">Add to Cart</button>
+                <button type="button" class="btn-buy-now" data-sku="night-raid-mat" data-name="Night Raid Portable Card Game Mat" data-price="49">Buy Now</button>
+              </div>
             </div>
           </article>
         </div>
@@ -197,7 +209,10 @@
               <h4>MVGE Starter Set · First Table</h4>
               <p class="product-desc">One Signature Deck + one Campus Portable Card Game Mat. Upgrade from random cards on a bare desk.</p>
               <p class="product-price">$59</p>
-              <button type="button" class="btn-add" data-sku="starter" data-name="Starter Set" data-price="59">Add to Order</button>
+              <div class="product-actions">
+                <button type="button" class="btn-add" data-sku="starter" data-name="Starter Set" data-price="59">Add to Cart</button>
+                <button type="button" class="btn-buy-now" data-sku="starter" data-name="Starter Set" data-price="59">Buy Now</button>
+              </div>
             </div>
           </article>
           <article class="product-card bundle-card">
@@ -206,7 +221,10 @@
               <h4>MVGE Pro Table · Game Night Host</h4>
               <p class="product-desc">Two decks + one Night Raid Mat. For the default game spot. Everyone knows the night is on.</p>
               <p class="product-price">$89</p>
-              <button type="button" class="btn-add" data-sku="pro-table" data-name="Pro Table Bundle" data-price="89">Add to Order</button>
+              <div class="product-actions">
+                <button type="button" class="btn-add" data-sku="pro-table" data-name="Pro Table Bundle" data-price="89">Add to Cart</button>
+                <button type="button" class="btn-buy-now" data-sku="pro-table" data-name="Pro Table Bundle" data-price="89">Buy Now</button>
+              </div>
             </div>
           </article>
         </div>
@@ -401,14 +419,40 @@
     <div class="modal-content modal-shop">
       <button class="close payment-close" aria-label="Close">&times;</button>
       <h2 id="paymentModalTitle">Payment</h2>
-      <p class="payment-notice">Online payment is not connected yet. Your order has been saved.</p>
-      <p class="payment-options">To complete your order now:</p>
+      <p class="payment-notice">There was a problem processing your payment. Please try again or contact us.</p>
+      <p class="payment-options">Need help with your order?</p>
       <ul class="payment-list">
         <li><a href="mailto:magecards7@gmail.com?subject=MVGE%20Order">Email us</a> with your cart and shipping details</li>
         <li>DM <a href="https://www.instagram.com/mvgecards?igsh=bnZ5NzV4MG5xbTA4" target="_blank" rel="noopener">@MVGE</a> on Instagram</li>
       </ul>
-      <p class="payment-soon">We’ll add WeChat Pay, Alipay, and card payments soon.</p>
+      <p class="payment-soon">We accept PayPal, WeChat Pay, Alipay, and major credit cards.</p>
       <button type="button" class="cta primary" id="paymentModalOk">OK</button>
+    </div>
+  </div>
+
+  <!-- Buy Now Modal: quick single-item PayPal checkout -->
+  <div id="buyNowModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="buyNowModalTitle" aria-hidden="true">
+    <div class="modal-content modal-shop">
+      <button class="close buy-now-close" aria-label="Close">&times;</button>
+      <h2 id="buyNowModalTitle">Quick Checkout</h2>
+      <p class="buy-now-product-label" id="buyNowProductLabel"></p>
+      <form id="buyNowForm">
+        <input type="hidden" id="buyNowSku" name="sku">
+        <input type="hidden" id="buyNowName" name="name">
+        <input type="hidden" id="buyNowPrice" name="price">
+        <label class="label">Full Name <input type="text" id="buyNowCustomerName" name="customer_name" required placeholder="Your name"></label>
+        <label class="label">Email <input type="email" id="buyNowEmail" name="email" required placeholder="you@example.com"></label>
+        <label class="label">Country
+          <select id="buyNowCountry" name="country" required>
+            <option value="">Select country</option>
+            <option value="US">United States</option>
+            <option value="CN">China</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <p class="buy-now-shipping-note" id="buyNowShippingNote"></p>
+        <button type="submit" class="cta primary" id="buyNowSubmitBtn">Pay with PayPal</button>
+      </form>
     </div>
   </div>
 
