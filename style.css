@@ -622,6 +622,19 @@ body {
   background: var(--white);
   color: var(--black);
 }
+.btn-buy-now {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 12px 20px;
+  background: var(--white);
+  color: var(--black);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  transition: opacity 0.2s;
+}
+.btn-buy-now:hover { opacity: 0.85; }
 .bundle-card .product-info { flex: 1; }
 
 /* ----- See It In Action: mat details + on-mat action ----- */
