@@ -625,16 +625,17 @@ body {
 .btn-buy-now {
   display: inline-block;
   margin-top: 10px;
-  padding: 12px 20px;
-  background: var(--white);
-  color: var(--black) !important;
+  padding: 10px 20px;
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.5);
   border-radius: 8px;
   font-weight: 600;
+  font-size: 0.85rem;
   text-decoration: none;
   text-align: center;
-  transition: opacity 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
-.btn-buy-now:hover { opacity: 0.85; }
+.btn-buy-now:hover { border-color: var(--white); background: rgba(255,255,255,0.08); }
 .bundle-card .product-info { flex: 1; }
 
 /* ----- See It In Action: mat details + on-mat action ----- */
