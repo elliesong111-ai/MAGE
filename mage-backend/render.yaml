@@ -5,12 +5,10 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: PAYPAL_CLIENT_ID
+      - key: SQUARE_WEBHOOK_SIGNATURE_KEY
         sync: false
-      - key: PAYPAL_CLIENT_SECRET
-        sync: false
-      - key: PAYPAL_ENVIRONMENT
-        value: sandbox
+      - key: SQUARE_WEBHOOK_URL
+        value: https://mage-payment-backend.onrender.com/webhook/square
       - key: EMAIL_USER
         sync: false
       - key: EMAIL_PASSWORD

@@ -1,28 +1,24 @@
 """
 MAGE Payment Backend
-Flask server using PayPal REST API v2 for checkout and order confirmation emails.
+Receives Square payment webhooks and sends order confirmation emails.
 """
 
 import os
+import hmac
+import hashlib
+import base64
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
-PAYPAL_CLIENT_ID = os.environ.get("PAYPAL_CLIENT_ID", "")
-PAYPAL_CLIENT_SECRET = os.environ.get("PAYPAL_CLIENT_SECRET", "")
-PAYPAL_ENVIRONMENT = os.environ.get("PAYPAL_ENVIRONMENT", "sandbox")
-PAYPAL_BASE_URL = (
-    "https://api-m.paypal.com"
-    if PAYPAL_ENVIRONMENT == "production"
-    else "https://api-m.sandbox.paypal.com"
-)
+SQUARE_WEBHOOK_SIGNATURE_KEY = os.environ.get("SQUARE_WEBHOOK_SIGNATURE_KEY", "")
+SQUARE_WEBHOOK_URL = os.environ.get("SQUARE_WEBHOOK_URL", "")  # full URL of this endpoint
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.gmail.com")
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
@@ -31,53 +27,29 @@ EMAIL_PASSWORD = os.environ.get("EMAIL_PASSWORD", "")
 EMAIL_FROM = os.environ.get("EMAIL_FROM", "magecards7@gmail.com")
 
 
-def get_paypal_token():
-    resp = requests.post(
-        f"{PAYPAL_BASE_URL}/v1/oauth2/token",
-        auth=(PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET),
-        data={"grant_type": "client_credentials"},
-        headers={"Accept": "application/json"},
-        timeout=10,
-    )
-    resp.raise_for_status()
-    return resp.json()["access_token"]
+def verify_square_signature(body_bytes: bytes, signature: str) -> bool:
+    """Verify Square webhook HMAC-SHA256 signature."""
+    if not SQUARE_WEBHOOK_SIGNATURE_KEY or not SQUARE_WEBHOOK_URL:
+        return True  # skip verification if not configured (dev mode)
+    combined = (SQUARE_WEBHOOK_URL + body_bytes.decode("utf-8")).encode("utf-8")
+    expected = base64.b64encode(
+        hmac.new(
+            SQUARE_WEBHOOK_SIGNATURE_KEY.encode("utf-8"),
+            combined,
+            hashlib.sha256,
+        ).digest()
+    ).decode("utf-8")
+    return hmac.compare_digest(expected, signature)
 
 
-def send_confirmation_email(customer_email, customer_name, cart, total):
+def send_confirmation_email(customer_email: str, customer_name: str, amount_dollars: float):
     if not EMAIL_USER or not EMAIL_PASSWORD:
-        return  # Skip if not configured
-
-    items_html = "".join(
-        f"<li>{item.get('name', 'Item')} &times; {item.get('qty', 1)}"
-        f" &mdash; ${float(item.get('price', 0)) * int(item.get('qty', 1)):.2f}</li>"
-        for item in cart
-    )
+        return
 
     html = f"""
     <div style="font-family:sans-serif;max-width:520px;margin:auto;color:#222;">
-      <h2 style="color:#000;">Thank you for your order, {customer_name}!</h2>
-      <p>Your MVGE order has been confirmed and payment received.</p>
-      <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-        <thead>
-          <tr style="border-bottom:2px solid #000;">
-            <th style="text-align:left;padding:6px 0;">Item</th>
-            <th style="text-align:right;padding:6px 0;">Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          {"".join(
-            f'<tr><td style="padding:6px 0;">{item.get("name","Item")} &times; {item.get("qty",1)}</td>'
-            f'<td style="text-align:right;padding:6px 0;">${float(item.get("price",0))*int(item.get("qty",1)):.2f}</td></tr>'
-            for item in cart
-          )}
-        </tbody>
-        <tfoot>
-          <tr style="border-top:2px solid #000;">
-            <td style="padding:8px 0;font-weight:bold;">Total</td>
-            <td style="text-align:right;padding:8px 0;font-weight:bold;">${total:.2f}</td>
-          </tr>
-        </tfoot>
-      </table>
+      <h2 style="color:#000;">Thank you for your order{", " + customer_name if customer_name else ""}!</h2>
+      <p>Your MVGE payment of <strong>${amount_dollars:.2f}</strong> has been received.</p>
       <p>We&rsquo;ll be in touch about shipping details soon.</p>
       <p>Questions? Reply to this email or DM
          <a href="https://www.instagram.com/mvgecards">@MVGE</a> on Instagram.</p>
@@ -107,164 +79,38 @@ def health():
     return jsonify({"status": "healthy"})
 
 
-@app.route("/config", methods=["GET"])
-def config():
-    """Return public configuration for the frontend (PayPal client ID)."""
-    return jsonify({"paypal_client_id": PAYPAL_CLIENT_ID})
-
-
-@app.route("/create-paypal-order", methods=["POST"])
-def create_paypal_order():
+@app.route("/webhook/square", methods=["POST"])
+def square_webhook():
     """
-    Create a PayPal order from the cart.
-
-    Request body:
-    {
-        "cart": [{"name": "Signature Deck", "price": 10, "qty": 2}, ...],
-        "gift_wrap": false
-    }
-
-    Response: {"id": "PAYPAL_ORDER_ID"}
+    Receive Square payment webhooks.
+    Square sends a POST when a payment completes.
+    We verify the signature then send a confirmation email to the buyer.
     """
-    try:
-        data = request.get_json() or {}
-        cart = data.get("cart", [])
-        gift_wrap = data.get("gift_wrap", False)
+    body_bytes = request.get_data()
+    signature = request.headers.get("x-square-hmacsha256-signature", "")
 
-        if not cart:
-            return jsonify({"error": "Cart is empty"}), 400
+    if not verify_square_signature(body_bytes, signature):
+        return jsonify({"error": "Invalid signature"}), 403
 
-        total = sum(
-            float(item.get("price", 0)) * int(item.get("qty", 1)) for item in cart
-        )
-        if gift_wrap:
-            total += 5.0
+    event = request.get_json(silent=True) or {}
+    event_type = event.get("type", "")
 
-        token = get_paypal_token()
+    if event_type == "payment.completed":
+        payment = event.get("data", {}).get("object", {}).get("payment", {})
+        buyer_email = payment.get("buyer_email_address", "")
+        amount_cents = payment.get("amount_money", {}).get("amount", 0)
+        amount_dollars = amount_cents / 100.0
 
-        order_payload = {
-            "intent": "CAPTURE",
-            "purchase_units": [
-                {
-                    "amount": {
-                        "currency_code": "USD",
-                        "value": f"{total:.2f}",
-                        "breakdown": {
-                            "item_total": {
-                                "currency_code": "USD",
-                                "value": f"{total:.2f}",
-                            }
-                        },
-                    },
-                    "items": [
-                        {
-                            "name": item.get("name", "Item")[:127],
-                            "quantity": str(int(item.get("qty", 1))),
-                            "unit_amount": {
-                                "currency_code": "USD",
-                                "value": f"{float(item.get('price', 0)):.2f}",
-                            },
-                        }
-                        for item in cart
-                    ]
-                    + (
-                        [
-                            {
-                                "name": "Gift Packaging",
-                                "quantity": "1",
-                                "unit_amount": {
-                                    "currency_code": "USD",
-                                    "value": "5.00",
-                                },
-                            }
-                        ]
-                        if gift_wrap
-                        else []
-                    ),
-                }
-            ],
-        }
+        # Square doesn't give us the buyer's name from a payment link,
+        # so we leave it blank and just use their email.
+        if buyer_email:
+            try:
+                send_confirmation_email(buyer_email, "", amount_dollars)
+            except Exception as e:
+                app.logger.error("Failed to send confirmation email: %s", e)
 
-        resp = requests.post(
-            f"{PAYPAL_BASE_URL}/v2/checkout/orders",
-            json=order_payload,
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Content-Type": "application/json",
-            },
-            timeout=15,
-        )
-        resp.raise_for_status()
-        order = resp.json()
-        return jsonify({"id": order["id"]})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-@app.route("/capture-paypal-order/<order_id>", methods=["POST"])
-def capture_paypal_order(order_id):
-    """
-    Capture an approved PayPal order and send a confirmation email.
-
-    Request body:
-    {
-        "customer": {"name": "...", "email": "..."},
-        "cart": [...],
-        "gift_wrap": false
-    }
-
-    Response: {"status": "COMPLETED"}
-    """
-    try:
-        data = request.get_json() or {}
-        customer = data.get("customer", {})
-        cart = data.get("cart", [])
-        gift_wrap = data.get("gift_wrap", False)
-
-        token = get_paypal_token()
-
-        resp = requests.post(
-            f"{PAYPAL_BASE_URL}/v2/checkout/orders/{order_id}/capture",
-            headers={
-                "Authorization": f"Bearer {token}",
-                "Content-Type": "application/json",
-            },
-            timeout=15,
-        )
-        resp.raise_for_status()
-        capture_data = resp.json()
-
-        if capture_data.get("status") == "COMPLETED":
-            total = sum(
-                float(item.get("price", 0)) * int(item.get("qty", 1))
-                for item in cart
-            )
-            if gift_wrap:
-                total += 5.0
-
-            if customer.get("email"):
-                try:
-                    send_confirmation_email(
-                        customer["email"],
-                        customer.get("name", "Customer"),
-                        cart,
-                        total,
-                    )
-                except Exception:
-                    pass  # Don't fail the payment if email fails
-
-            return jsonify({"status": "COMPLETED"})
-
-        return jsonify(
-            {
-                "error": "Payment not completed",
-                "status": capture_data.get("status"),
-            }
-        ), 400
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    # Always return 200 so Square doesn't retry
+    return jsonify({"status": "ok"}), 200
 
 
 if __name__ == "__main__":
