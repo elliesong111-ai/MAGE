@@ -102,6 +102,7 @@ def square_webhook():
         amount_cents = payment.get("amount_money", {}).get("amount", 0)
         amount_dollars = amount_cents / 100.0
 
+        if status == "COMPLETED" and buyer_email:
             try:
                 send_confirmation_email(buyer_email, "", amount_dollars)
             except Exception as e:
