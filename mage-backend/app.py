@@ -95,15 +95,13 @@ def square_webhook():
     event = request.get_json(silent=True) or {}
     event_type = event.get("type", "")
 
-    if event_type == "payment.completed":
+    if event_type == "payment.updated":
         payment = event.get("data", {}).get("object", {}).get("payment", {})
+        status = payment.get("status", "")
         buyer_email = payment.get("buyer_email_address", "")
         amount_cents = payment.get("amount_money", {}).get("amount", 0)
         amount_dollars = amount_cents / 100.0
 
-        # Square doesn't give us the buyer's name from a payment link,
-        # so we leave it blank and just use their email.
-        if buyer_email:
             try:
                 send_confirmation_email(buyer_email, "", amount_dollars)
             except Exception as e:
