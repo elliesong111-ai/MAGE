@@ -18,7 +18,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
+  <!-- PayPal SDK loaded dynamically by script.js after fetching client-id from backend -->
   <!-- Critical inline CSS: dark theme + TAP TO BEGIN visible even if style.css fails -->
   <style>
     body{background:#000!important;color:#fff!important;margin:0;font-family:Outfit,system-ui,sans-serif;}
@@ -336,37 +337,60 @@
   <section id="checkout" class="section checkout">
     <div class="container checkout-container">
       <h2 class="section-title">Checkout · Build Your MVGE Setup</h2>
-      <p class="section-intro">Secure checkout. We accept WeChat Pay and PayPal.</p>
+      <p class="section-intro">Secure checkout via PayPal — pay with your PayPal account or any credit / debit card.</p>
       <div class="checkout-layout">
         <div class="checkout-form-wrap">
           <form id="checkoutForm" class="checkout-form">
             <fieldset class="checkout-fieldset">
-              <legend>Shipping Details</legend>
-              <label>Full Name <input type="text" name="name" required placeholder="Your name"></label>
-              <label>Email <input type="email" name="email" required placeholder="you@example.com"></label>
-              <label>Address <input type="text" name="address" required placeholder="Street, City, State, ZIP"></label>
-              <label>Country
-                <select name="country" id="country" required>
-                  <option value="">Select country</option>
-                  <option value="US">United States</option>
-                  <option value="CN">China</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-            </fieldset>
-            <fieldset class="checkout-fieldset">
-              <legend>Options</legend>
-              <label class="checkbox-label"><input type="checkbox" name="gift_wrap" id="giftWrap"> Gift packaging (+$5)</label>
-              <label class="checkbox-label"><input type="checkbox" name="magician_bundle"> Magician recommended bundle (best value)</label>
+              <legend>Your Info</legend>
+              <label>Full Name <input type="text" name="name" id="checkoutName" required placeholder="Your name"></label>
+              <label>Email <input type="email" name="email" id="checkoutEmail" required placeholder="you@example.com"></label>
             </fieldset>
             <fieldset class="checkout-fieldset payment-fieldset">
               <legend>Payment Method</legend>
               <div class="payment-methods">
-                <label class="payment-option"><input type="radio" name="payment" value="wechat"> <span class="pay-icon">WeChat</span></label>
-                <label class="payment-option"><input type="radio" name="payment" value="paypal"> <span class="pay-icon">PayPal</span></label>
+                <label class="payment-option"><input type="radio" name="payment" value="paypal" checked> <span class="pay-icon">PayPal</span></label>
+                <label class="payment-option"><input type="radio" name="payment" value="card"> <span class="pay-icon">Credit / Debit Card</span></label>
+                <label class="payment-option"><input type="radio" name="payment" value="wechat"> <span class="pay-icon">WeChat Pay</span></label>
               </div>
             </fieldset>
-            <button type="submit" class="cta cta-submit" id="placeOrderBtn">Place Order</button>
+
+            <!-- PayPal panel -->
+            <div id="paypal-panel" class="payment-panel">
+              <div id="paypal-button-container"></div>
+            </div>
+
+            <!-- Credit / Debit Card panel (PayPal Hosted Fields) -->
+            <div id="card-panel" class="payment-panel" hidden>
+              <div class="card-fields-wrap">
+                <label class="card-field-label">Card Number
+                  <div id="card-number-field" class="card-hosted-field"></div>
+                </label>
+                <div class="card-row">
+                  <label class="card-field-label">Expiry
+                    <div id="expiration-date-field" class="card-hosted-field"></div>
+                  </label>
+                  <label class="card-field-label">CVV
+                    <div id="cvv-field" class="card-hosted-field"></div>
+                  </label>
+                </div>
+              </div>
+              <button type="button" class="cta cta-submit" id="card-pay-btn">Pay Now</button>
+              <p id="card-panel-fallback" class="card-fallback" hidden>Card fields unavailable — please use the PayPal button above.</p>
+            </div>
+
+            <!-- WeChat panel -->
+            <div id="wechat-panel" class="payment-panel" hidden>
+              <div class="wechat-instructions">
+                <p>To pay via WeChat Pay:</p>
+                <ol>
+                  <li>Add up your cart total from the Order Summary.</li>
+                  <li>Send payment to our WeChat ID: <strong>mvgecards</strong></li>
+                  <li>Include your name and order details in the note.</li>
+                  <li>Email <a href="mailto:magecards7@gmail.com">magecards7@gmail.com</a> with a screenshot to confirm.</li>
+                </ol>
+              </div>
+            </div>
           </form>
         </div>
         <aside class="checkout-summary">
@@ -394,19 +418,13 @@
     </div>
   </footer>
 
-  <!-- Payment notice modal (after Place Order) -->
+  <!-- Payment success modal -->
   <div id="paymentModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle" aria-hidden="true">
     <div class="modal-content modal-shop">
-      <button class="close payment-close" aria-label="Close">&times;</button>
-      <h2 id="paymentModalTitle">Payment</h2>
-      <p class="payment-notice">Online payment is not connected yet. Your order has been saved.</p>
-      <p class="payment-options">To complete your order now:</p>
-      <ul class="payment-list">
-        <li><a href="mailto:magecards7@gmail.com?subject=MVGE%20Order">Email us</a> with your cart and shipping details</li>
-        <li>DM <a href="https://www.instagram.com/mvgecards?igsh=bnZ5NzV4MG5xbTA4" target="_blank" rel="noopener">@MVGE</a> on Instagram</li>
-      </ul>
-      <p class="payment-soon">We’ll add full WeChat Pay and PayPal integration soon.</p>
-      <button type="button" class="cta primary" id="paymentModalOk">OK</button>
+      <h2 id="paymentModalTitle">Order Confirmed!</h2>
+      <p class="payment-notice">Your payment was successful. A confirmation email is on its way to you.</p>
+      <p class="payment-soon">Questions? Email <a href="mailto:magecards7@gmail.com">magecards7@gmail.com</a> or DM <a href="https://www.instagram.com/mvgecards?igsh=bnZ5NzV4MG5xbTA4" target="_blank" rel="noopener">@MVGE</a>.</p>
+      <button type="button" class="cta primary" id="paymentModalOk">Done</button>
     </div>
   </div>
 

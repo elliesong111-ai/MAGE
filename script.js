@@ -755,183 +755,201 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   }
 
-  // ----- Checkout form -----
+  // ----- Checkout / PayPal -----
   const PAYMENT_API_URL = 'https://mage-payment-backend.onrender.com';
 
-  // Create payment loading overlay
-  function showPaymentLoading() {
-    const overlay = document.createElement('div');
-    overlay.className = 'payment-loading';
-    overlay.id = 'paymentLoading';
-    overlay.innerHTML = `
-      <div class="payment-loading-content">
-        <div class="payment-cards">
-          <span class="payment-card-anim">🎴</span>
-          <span class="payment-card-anim">🎴</span>
-          <span class="payment-card-anim">🎴</span>
-        </div>
-        <div class="payment-spinner"></div>
-        <div class="payment-loading-text">Processing your order...</div>
-        <div class="payment-loading-sub">Shuffling magic into your cart ✨</div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    
-    // Trigger particle effect
-    if (window.MageParticles) {
-      const rect = overlay.getBoundingClientRect();
-      window.MageParticles.burst(rect.width / 2, rect.height / 2, 20);
-    }
-    
-    return overlay;
-  }
-
-  function hidePaymentLoading() {
-    const overlay = document.getElementById('paymentLoading');
-    if (overlay) {
-      overlay.style.opacity = '0';
-      setTimeout(() => overlay.remove(), 300);
-    }
-  }
-
+  // ---- helpers ----
   function showPaymentError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.className = 'payment-error';
-    errorDiv.innerHTML = `
-      <div class="payment-error-title">⚠️ Payment Error</div>
-      <div class="payment-error-message">${message}</div>
-    `;
-    
     const checkoutForm = document.getElementById('checkoutForm');
     const existingError = checkoutForm?.querySelector('.payment-error');
     if (existingError) existingError.remove();
-    
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'payment-error';
+    errorDiv.innerHTML = `<div class="payment-error-title">Payment Error</div><div class="payment-error-message">${message}</div>`;
     checkoutForm?.appendChild(errorDiv);
-    
-    // Auto-remove after 10 seconds
-    setTimeout(() => errorDiv.remove(), 10000);
+    setTimeout(() => errorDiv.remove(), 12000);
   }
 
-  const checkoutForm = document.getElementById('checkoutForm');
-  if (checkoutForm) {
-    checkoutForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const cart = getCart();
-      if (cart.length === 0) {
-        showToast('Your cart is empty. Add items from Shop.');
-        return;
-      }
+  function showSuccessModal() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) { modal.style.display = 'flex'; modal.setAttribute('aria-hidden', 'false'); }
+    if (window.MageSound) window.MageSound.play('success');
+    if (window.MageParticles) window.MageParticles.confetti(window.innerWidth / 2, window.innerHeight / 2, 60);
+    clearCart();
+    track('checkout_complete');
+  }
 
-      const placeOrderBtn = document.getElementById('placeOrderBtn');
-      const originalText = placeOrderBtn ? placeOrderBtn.textContent : 'Place Order';
+  function getCustomer() {
+    return {
+      name: (document.getElementById('checkoutName')?.value || '').trim(),
+      email: (document.getElementById('checkoutEmail')?.value || '').trim(),
+    };
+  }
 
-      const formData = new FormData(checkoutForm);
-      const customer = {
-        name: formData.get('name') || '',
-        email: formData.get('email') || '',
-        address: formData.get('address') || '',
-      };
+  function validateCustomer() {
+    const c = getCustomer();
+    if (!c.name) { showToast('Please enter your name.'); return false; }
+    if (!c.email || !c.email.includes('@')) { showToast('Please enter a valid email.'); return false; }
+    const cart = getCart();
+    if (cart.length === 0) { showToast('Your cart is empty. Add items from Shop.'); return false; }
+    return true;
+  }
 
-      // Validate required fields
-      if (!customer.name || !customer.email) {
-        showToast('Please fill in your name and email.');
-        return;
-      }
-
-      const countrySelect = document.getElementById('country');
-      const country = countrySelect ? countrySelect.value : '';
-      let subtotal = 0;
-      cart.forEach(item => { subtotal += (item.price || 0) * (item.qty || 1); });
-      let shipping = 0;
-      if (country === 'US') shipping = subtotal >= 75 ? 0 : 8;
-      else if (country === 'CN') shipping = subtotal >= 100 ? 0 : 12;
-      else if (country && country !== '') shipping = 15;
-
-      const giftWrapEl = document.getElementById('giftWrap');
-      const giftWrapChecked = giftWrapEl ? giftWrapEl.checked : false;
-
-      // Show loading state
-      if (placeOrderBtn) {
-        placeOrderBtn.classList.add('loading');
-        placeOrderBtn.textContent = '';
-        placeOrderBtn.disabled = true;
-      }
-
-      // Show full-screen loading overlay
-      const loadingOverlay = showPaymentLoading();
-
-      try {
-        const response = await fetch(`${PAYMENT_API_URL}/create-checkout`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cart: cart,
-            shipping: shipping,
-            gift_wrap: giftWrapChecked,
-            customer: customer,
-          }),
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.checkout_url) {
-          track('checkout_redirect', { total: subtotal + shipping + (giftWrapChecked ? 5 : 0) });
-          
-          // Play success sound
-          if (window.MageSound) window.MageSound.play('success');
-          
-          // Confetti celebration
-          if (window.MageParticles) {
-            window.MageParticles.confetti(window.innerWidth / 2, window.innerHeight / 2, 50);
-          }
-          
-          // Short delay before redirect for visual feedback
-          setTimeout(() => {
-            window.location.href = data.checkout_url;
-          }, 800);
-        } else {
-          hidePaymentLoading();
-          console.error('Checkout error:', data);
-          
-          const errorMessage = data.error || 'Payment system unavailable. Please try again or contact us.';
-          showPaymentError(errorMessage);
-          
-          const paymentModal = document.getElementById('paymentModal');
-          if (paymentModal) {
-            paymentModal.style.display = 'flex';
-            paymentModal.setAttribute('aria-hidden', 'false');
-          }
-        }
-      } catch (err) {
-        hidePaymentLoading();
-        console.error('Checkout fetch error:', err);
-        
-        showPaymentError('Network error. Please check your connection and try again.');
-        
-        const paymentModal = document.getElementById('paymentModal');
-        if (paymentModal) {
-          paymentModal.style.display = 'flex';
-          paymentModal.setAttribute('aria-hidden', 'false');
-        }
-      } finally {
-        if (placeOrderBtn) {
-          placeOrderBtn.classList.remove('loading');
-          placeOrderBtn.textContent = originalText;
-          placeOrderBtn.disabled = false;
-        }
-      }
-
-      track('checkout_submit');
+  // ---- payment panel switching ----
+  function switchPaymentPanel(method) {
+    ['paypal', 'card', 'wechat'].forEach(m => {
+      const panel = document.getElementById(`${m}-panel`);
+      if (panel) panel.hidden = (m !== method);
     });
   }
 
+  document.querySelectorAll('input[name="payment"]').forEach(radio => {
+    radio.addEventListener('change', () => switchPaymentPanel(radio.value));
+  });
+  // show initial panel
+  const initialMethod = document.querySelector('input[name="payment"]:checked')?.value || 'paypal';
+  switchPaymentPanel(initialMethod);
+
+  // ---- PayPal SDK dynamic load ----
+  async function loadPayPalSDK() {
+    try {
+      const cfgResp = await fetch(`${PAYMENT_API_URL}/config`);
+      const cfg = await cfgResp.json();
+      const clientId = cfg.paypal_client_id;
+      if (!clientId) return;
+
+      await new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture&components=buttons,hosted-fields`;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+
+      initPayPalButtons();
+      initCardFields();
+    } catch (err) {
+      console.warn('PayPal SDK failed to load:', err);
+    }
+  }
+
+  // ---- PayPal Buttons ----
+  function initPayPalButtons() {
+    if (!window.paypal?.Buttons) return;
+    paypal.Buttons({
+      style: { layout: 'vertical', color: 'black', shape: 'rect', label: 'pay' },
+      createOrder: async () => {
+        if (!validateCustomer()) throw new Error('Validation failed');
+        const resp = await fetch(`${PAYMENT_API_URL}/create-paypal-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cart: getCart() }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Could not create order');
+        return data.id;
+      },
+      onApprove: async (data) => {
+        const customer = getCustomer();
+        const resp = await fetch(`${PAYMENT_API_URL}/capture-paypal-order/${data.orderID}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer, cart: getCart() }),
+        });
+        const result = await resp.json();
+        if (result.status === 'COMPLETED') {
+          showSuccessModal();
+        } else {
+          showPaymentError(result.error || 'Payment could not be completed. Please try again.');
+        }
+      },
+      onError: (err) => {
+        console.error('PayPal error:', err);
+        showPaymentError('Payment failed. Please try again or contact us.');
+      },
+    }).render('#paypal-button-container');
+  }
+
+  // ---- PayPal Hosted Card Fields ----
+  function initCardFields() {
+    if (!window.paypal?.HostedFields) return;
+    const fallback = document.getElementById('card-panel-fallback');
+    if (!paypal.HostedFields.isEligible()) {
+      if (fallback) fallback.hidden = false;
+      return;
+    }
+
+    paypal.HostedFields.render({
+      createOrder: async () => {
+        if (!validateCustomer()) throw new Error('Validation failed');
+        const resp = await fetch(`${PAYMENT_API_URL}/create-paypal-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cart: getCart() }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Could not create order');
+        return data.id;
+      },
+      fields: {
+        number:         { selector: '#card-number-field',      placeholder: '4111 1111 1111 1111' },
+        expirationDate: { selector: '#expiration-date-field',  placeholder: 'MM / YYYY' },
+        cvv:            { selector: '#cvv-field',              placeholder: 'CVV' },
+      },
+    }).then(hostedFields => {
+      const btn = document.getElementById('card-pay-btn');
+      if (!btn) return;
+      btn.addEventListener('click', async () => {
+        if (!validateCustomer()) return;
+        btn.disabled = true;
+        btn.textContent = 'Processing…';
+        try {
+          const { liabilityShifted, orderID } = await hostedFields.submit({
+            cardholderName: getCustomer().name,
+          });
+          const customer = getCustomer();
+          const resp = await fetch(`${PAYMENT_API_URL}/capture-paypal-order/${orderID}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ customer, cart: getCart() }),
+          });
+          const result = await resp.json();
+          if (result.status === 'COMPLETED') {
+            showSuccessModal();
+          } else {
+            showPaymentError(result.error || 'Card payment could not be completed.');
+          }
+        } catch (err) {
+          console.error('Card pay error:', err);
+          showPaymentError('Card payment failed. Please check your details and try again.');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Pay Now';
+        }
+      });
+    }).catch(err => {
+      console.warn('Hosted fields render failed:', err);
+      if (fallback) fallback.hidden = false;
+    });
+  }
+
+  // ---- success modal close ----
   const paymentModal = document.getElementById('paymentModal');
-  const paymentClose = document.querySelector('.payment-close');
   const paymentOk = document.getElementById('paymentModalOk');
   if (paymentModal) {
-    if (paymentClose) paymentClose.addEventListener('click', () => { paymentModal.style.display = 'none'; paymentModal.setAttribute('aria-hidden', 'true'); });
     if (paymentOk) paymentOk.addEventListener('click', () => { paymentModal.style.display = 'none'; paymentModal.setAttribute('aria-hidden', 'true'); });
     paymentModal.addEventListener('click', (e) => { if (e.target === paymentModal) { paymentModal.style.display = 'none'; paymentModal.setAttribute('aria-hidden', 'true'); } });
+  }
+
+  // Kick off SDK load when checkout section is visible
+  const checkoutSection = document.getElementById('checkout');
+  if (checkoutSection) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) { observer.disconnect(); loadPayPalSDK(); }
+    }, { threshold: 0.1 });
+    observer.observe(checkoutSection);
+  } else {
+    loadPayPalSDK();
   }
 
   // =====================================================

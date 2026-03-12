@@ -5,9 +5,15 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: SQUARE_ACCESS_TOKEN
+      - key: PAYPAL_CLIENT_ID
         sync: false
-      - key: SQUARE_LOCATION_ID
+      - key: PAYPAL_CLIENT_SECRET
         sync: false
-      - key: SQUARE_ENVIRONMENT
+      - key: PAYPAL_ENVIRONMENT
         value: sandbox
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
+      - key: EMAIL_FROM
+        sync: false

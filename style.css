@@ -976,7 +976,7 @@ body {
 .checkbox-label input { width: auto; margin: 0; }
 .payment-methods {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
 }
 .payment-option {
@@ -1002,6 +1002,44 @@ body {
   font-size: 1.1rem;
 }
 .cta-submit:hover { box-shadow: 0 0 24px rgba(255,255,255,0.25); }
+
+/* Payment panels */
+.payment-panel { margin-top: 20px; }
+#paypal-button-container { min-height: 48px; }
+
+/* Hosted card fields */
+.card-fields-wrap { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
+.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.card-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+.card-hosted-field {
+  height: 44px;
+  background: var(--black);
+  border: 1px solid var(--border-white);
+  border-radius: 8px;
+  padding: 0 12px;
+  transition: border-color 0.2s;
+}
+.card-hosted-field.braintree-hosted-fields-focused { border-color: var(--white); }
+.card-fallback { color: var(--gray); font-size: 0.88rem; margin-top: 8px; }
+
+/* WeChat instructions */
+.wechat-instructions {
+  background: var(--black-soft);
+  border: 1px solid var(--border-white);
+  border-radius: 12px;
+  padding: 20px 24px;
+  font-size: 0.95rem;
+  line-height: 1.7;
+}
+.wechat-instructions p { margin: 0 0 8px; color: var(--gray); }
+.wechat-instructions ol { margin: 0; padding-left: 20px; color: var(--white); }
+.wechat-instructions a { color: var(--white); text-decoration: underline; }
 .summary-box {
   background: var(--black-soft);
   border: 1px solid var(--border-white);
