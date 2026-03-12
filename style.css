@@ -1005,28 +1005,6 @@ body {
 
 /* Payment panels */
 .payment-panel { margin-top: 20px; }
-#paypal-button-container { min-height: 48px; }
-
-/* Hosted card fields */
-.card-fields-wrap { display: flex; flex-direction: column; gap: 14px; margin-bottom: 16px; }
-.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.card-field-label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 0.9rem;
-  color: var(--gray);
-}
-.card-hosted-field {
-  height: 44px;
-  background: var(--black);
-  border: 1px solid var(--border-white);
-  border-radius: 8px;
-  padding: 0 12px;
-  transition: border-color 0.2s;
-}
-.card-hosted-field.braintree-hosted-fields-focused { border-color: var(--white); }
-.card-fallback { color: var(--gray); font-size: 0.88rem; margin-top: 8px; }
 
 /* WeChat instructions */
 .wechat-instructions {

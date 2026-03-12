@@ -19,7 +19,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css?v=5">
-  <!-- PayPal SDK loaded dynamically by script.js after fetching client-id from backend -->
   <!-- Critical inline CSS: dark theme + TAP TO BEGIN visible even if style.css fails -->
   <style>
     body{background:#000!important;color:#fff!important;margin:0;font-family:Outfit,system-ui,sans-serif;}
@@ -337,7 +336,7 @@
   <section id="checkout" class="section checkout">
     <div class="container checkout-container">
       <h2 class="section-title">Checkout · Build Your MVGE Setup</h2>
-      <p class="section-intro">Secure checkout via PayPal — pay with your PayPal account or any credit / debit card.</p>
+      <p class="section-intro">Secure checkout — pay with PayPal, credit card, or WeChat Pay.</p>
       <div class="checkout-layout">
         <div class="checkout-form-wrap">
           <form id="checkoutForm" class="checkout-form">
@@ -355,28 +354,9 @@
               </div>
             </fieldset>
 
-            <!-- PayPal panel -->
-            <div id="paypal-panel" class="payment-panel">
-              <div id="paypal-button-container"></div>
-            </div>
-
-            <!-- Credit / Debit Card panel (PayPal Hosted Fields) -->
-            <div id="card-panel" class="payment-panel" hidden>
-              <div class="card-fields-wrap">
-                <label class="card-field-label">Card Number
-                  <div id="card-number-field" class="card-hosted-field"></div>
-                </label>
-                <div class="card-row">
-                  <label class="card-field-label">Expiry
-                    <div id="expiration-date-field" class="card-hosted-field"></div>
-                  </label>
-                  <label class="card-field-label">CVV
-                    <div id="cvv-field" class="card-hosted-field"></div>
-                  </label>
-                </div>
-              </div>
-              <button type="button" class="cta cta-submit" id="card-pay-btn">Pay Now</button>
-              <p id="card-panel-fallback" class="card-fallback" hidden>Card fields unavailable — please use the PayPal button above.</p>
+            <!-- PayPal / Card panel — both go to Square checkout -->
+            <div id="pay-panel" class="payment-panel">
+              <button type="button" class="cta cta-submit" id="payBtn">Pay</button>
             </div>
 
             <!-- WeChat panel -->
@@ -384,7 +364,7 @@
               <div class="wechat-instructions">
                 <p>To pay via WeChat Pay:</p>
                 <ol>
-                  <li>Add up your cart total from the Order Summary.</li>
+                  <li>Note your cart total from the Order Summary.</li>
                   <li>Send payment to our WeChat ID: <strong>mvgecards</strong></li>
                   <li>Include your name and order details in the note.</li>
                   <li>Email <a href="mailto:magecards7@gmail.com">magecards7@gmail.com</a> with a screenshot to confirm.</li>
