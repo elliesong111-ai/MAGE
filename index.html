@@ -336,7 +336,7 @@
   <section id="checkout" class="section checkout">
     <div class="container checkout-container">
       <h2 class="section-title">Checkout · Build Your MVGE Setup</h2>
-      <p class="section-intro">Secure checkout — pay with PayPal, credit card, or WeChat Pay.</p>
+      <p class="section-intro">Secure checkout.</p>
       <div class="checkout-layout">
         <div class="checkout-form-wrap">
           <form id="checkoutForm" class="checkout-form">
@@ -345,32 +345,7 @@
               <label>Full Name <input type="text" name="name" id="checkoutName" required placeholder="Your name"></label>
               <label>Email <input type="email" name="email" id="checkoutEmail" required placeholder="you@example.com"></label>
             </fieldset>
-            <fieldset class="checkout-fieldset payment-fieldset">
-              <legend>Payment Method</legend>
-              <div class="payment-methods">
-                <label class="payment-option"><input type="radio" name="payment" value="paypal" checked> <span class="pay-icon">PayPal</span></label>
-                <label class="payment-option"><input type="radio" name="payment" value="card"> <span class="pay-icon">Credit / Debit Card</span></label>
-                <label class="payment-option"><input type="radio" name="payment" value="wechat"> <span class="pay-icon">WeChat Pay</span></label>
-              </div>
-            </fieldset>
-
-            <!-- PayPal / Card panel — both go to Square checkout -->
-            <div id="pay-panel" class="payment-panel">
-              <button type="button" class="cta cta-submit" id="payBtn">Pay</button>
-            </div>
-
-            <!-- WeChat panel -->
-            <div id="wechat-panel" class="payment-panel" hidden>
-              <div class="wechat-instructions">
-                <p>To pay via WeChat Pay:</p>
-                <ol>
-                  <li>Note your cart total from the Order Summary.</li>
-                  <li>Send payment to our WeChat ID: <strong>mvgecards</strong></li>
-                  <li>Include your name and order details in the note.</li>
-                  <li>Email <a href="mailto:magecards7@gmail.com">magecards7@gmail.com</a> with a screenshot to confirm.</li>
-                </ol>
-              </div>
-            </div>
+            <button type="button" class="cta cta-submit" id="payBtn">Buy Now</button>
           </form>
         </div>
         <aside class="checkout-summary">

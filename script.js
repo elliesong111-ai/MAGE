@@ -758,20 +758,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ----- Checkout -----
   const SQUARE_CHECKOUT_URL = 'https://square.link/u/srITjSrZ';
 
-  // ---- payment panel switching ----
-  function switchPaymentPanel(method) {
-    const payPanel = document.getElementById('pay-panel');
-    const wechatPanel = document.getElementById('wechat-panel');
-    if (payPanel) payPanel.hidden = (method === 'wechat');
-    if (wechatPanel) wechatPanel.hidden = (method !== 'wechat');
-  }
-
-  document.querySelectorAll('input[name="payment"]').forEach(radio => {
-    radio.addEventListener('change', () => switchPaymentPanel(radio.value));
-  });
-  switchPaymentPanel(document.querySelector('input[name="payment"]:checked')?.value || 'paypal');
-
-  // ---- Pay button → Square ----
   const payBtn = document.getElementById('payBtn');
   if (payBtn) {
     payBtn.addEventListener('click', () => {
