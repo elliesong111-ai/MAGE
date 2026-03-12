@@ -1015,6 +1015,15 @@ body {
   font-size: 1.1rem;
 }
 .cta-submit:hover { box-shadow: 0 0 24px rgba(255,255,255,0.25); }
+.skip-confirmation {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.88rem;
+  color: var(--gray);
+  text-decoration: underline;
+}
+.skip-confirmation:hover { color: var(--white); }
 
 /* Payment panels */
 .payment-panel { margin-top: 20px; }
