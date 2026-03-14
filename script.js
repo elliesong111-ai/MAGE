@@ -661,6 +661,114 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // ----- Buy Now (instant PayPal checkout) -----
+  const buyNowModal = document.getElementById('buyNowModal');
+  const buyNowForm = document.getElementById('buyNowForm');
+  const buyNowClose = document.querySelector('.buy-now-close');
+
+  function openBuyNowModal(sku, name, price) {
+    if (!buyNowModal) return;
+    document.getElementById('buyNowSku').value = sku;
+    document.getElementById('buyNowName').value = name;
+    document.getElementById('buyNowPrice').value = price;
+    document.getElementById('buyNowProductLabel').textContent = `${name} — $${price}`;
+    document.getElementById('buyNowShippingNote').textContent = '';
+    buyNowModal.style.display = 'flex';
+    buyNowModal.setAttribute('aria-hidden', 'false');
+    track('buy_now_open', { sku, name });
+  }
+
+  if (buyNowClose) {
+    buyNowClose.addEventListener('click', () => {
+      buyNowModal.style.display = 'none';
+      buyNowModal.setAttribute('aria-hidden', 'true');
+    });
+  }
+  if (buyNowModal) {
+    buyNowModal.addEventListener('click', (e) => {
+      if (e.target === buyNowModal) {
+        buyNowModal.style.display = 'none';
+        buyNowModal.setAttribute('aria-hidden', 'true');
+      }
+    });
+
+    // Update shipping note when country changes
+    document.getElementById('buyNowCountry')?.addEventListener('change', () => {
+      const country = document.getElementById('buyNowCountry').value;
+      const price = parseFloat(document.getElementById('buyNowPrice').value || '0');
+      let shipping = 0;
+      if (country === 'US') shipping = price >= 75 ? 0 : 8;
+      else if (country === 'CN') shipping = price >= 100 ? 0 : 12;
+      else if (country && country !== '') shipping = 15;
+      const note = document.getElementById('buyNowShippingNote');
+      if (note) note.textContent = shipping === 0 ? 'Shipping: Free' : `Shipping: $${shipping.toFixed(2)}`;
+    });
+  }
+
+  document.querySelectorAll('.btn-buy-now').forEach(btn => {
+    btn.addEventListener('click', () => {
+      openBuyNowModal(btn.dataset.sku, btn.dataset.name, btn.dataset.price);
+    });
+  });
+
+  if (buyNowForm) {
+    buyNowForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const sku = document.getElementById('buyNowSku').value;
+      const name = document.getElementById('buyNowName').value;
+      const price = parseFloat(document.getElementById('buyNowPrice').value || '0');
+      const customerName = document.getElementById('buyNowCustomerName').value.trim();
+      const email = document.getElementById('buyNowEmail').value.trim();
+      const country = document.getElementById('buyNowCountry').value;
+
+      if (!customerName || !email || !country) {
+        showToast('Please fill in all fields.');
+        return;
+      }
+
+      let shipping = 0;
+      if (country === 'US') shipping = price >= 75 ? 0 : 8;
+      else if (country === 'CN') shipping = price >= 100 ? 0 : 12;
+      else if (country && country !== '') shipping = 15;
+
+      const submitBtn = document.getElementById('buyNowSubmitBtn');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Redirecting...'; }
+
+      const loadingOverlay = showPaymentLoading();
+
+      try {
+        const response = await fetch(`${PAYMENT_API_URL}/create-paypal-order`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cart: [{ sku, name, price, qty: 1 }],
+            shipping,
+            gift_wrap: false,
+            customer: { name: customerName, email },
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.approval_url) {
+          track('buy_now_paypal', { sku, total: price + shipping });
+          if (window.MageSound) window.MageSound.play('success');
+          if (window.MageParticles) window.MageParticles.confetti(window.innerWidth / 2, window.innerHeight / 2, 40);
+          setTimeout(() => { window.location.href = data.approval_url; }, 800);
+        } else {
+          hidePaymentLoading();
+          showPaymentError(data.error || 'PayPal checkout unavailable. Please try again.');
+        }
+      } catch (err) {
+        hidePaymentLoading();
+        console.error('Buy Now error:', err);
+        showPaymentError('Network error. Please check your connection and try again.');
+      } finally {
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Pay with PayPal'; }
+      }
+    });
+  }
+
   // ----- Cart summary (checkout) -----
   function updateCartSummary() {
     const cart = getCart();
@@ -850,6 +958,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const giftWrapEl = document.getElementById('giftWrap');
       const giftWrapChecked = giftWrapEl ? giftWrapEl.checked : false;
 
+      const paymentMethod = formData.get('payment') || '';
+
       // Show loading state
       if (placeOrderBtn) {
         placeOrderBtn.classList.add('loading');
@@ -861,41 +971,48 @@ document.addEventListener('DOMContentLoaded', () => {
       const loadingOverlay = showPaymentLoading();
 
       try {
-        const response = await fetch(`${PAYMENT_API_URL}/create-checkout`, {
+        const payload = {
+          cart: cart,
+          shipping: shipping,
+          gift_wrap: giftWrapChecked,
+          customer: customer,
+        };
+
+        const usePayPal = paymentMethod === 'paypal';
+        const endpoint = usePayPal ? '/create-paypal-order' : '/create-checkout';
+
+        const response = await fetch(`${PAYMENT_API_URL}${endpoint}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cart: cart,
-            shipping: shipping,
-            gift_wrap: giftWrapChecked,
-            customer: customer,
-          }),
+          body: JSON.stringify(payload),
         });
 
         const data = await response.json();
 
-        if (response.ok && data.checkout_url) {
-          track('checkout_redirect', { total: subtotal + shipping + (giftWrapChecked ? 5 : 0) });
-          
+        const redirectUrl = usePayPal ? data.approval_url : data.checkout_url;
+
+        if (response.ok && redirectUrl) {
+          track('checkout_redirect', { method: paymentMethod || 'square', total: subtotal + shipping + (giftWrapChecked ? 5 : 0) });
+
           // Play success sound
           if (window.MageSound) window.MageSound.play('success');
-          
+
           // Confetti celebration
           if (window.MageParticles) {
             window.MageParticles.confetti(window.innerWidth / 2, window.innerHeight / 2, 50);
           }
-          
+
           // Short delay before redirect for visual feedback
           setTimeout(() => {
-            window.location.href = data.checkout_url;
+            window.location.href = redirectUrl;
           }, 800);
         } else {
           hidePaymentLoading();
           console.error('Checkout error:', data);
-          
+
           const errorMessage = data.error || 'Payment system unavailable. Please try again or contact us.';
           showPaymentError(errorMessage);
-          
+
           const paymentModal = document.getElementById('paymentModal');
           if (paymentModal) {
             paymentModal.style.display = 'flex';
@@ -905,9 +1022,9 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (err) {
         hidePaymentLoading();
         console.error('Checkout fetch error:', err);
-        
+
         showPaymentError('Network error. Please check your connection and try again.');
-        
+
         const paymentModal = document.getElementById('paymentModal');
         if (paymentModal) {
           paymentModal.style.display = 'flex';
