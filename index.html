@@ -403,7 +403,10 @@
                 <p style="color:rgba(255,255,255,0.6);font-size:14px;margin:4px 0;">WeChat Pay · Alipay · PayPal · Credit Card</p>
               </div>
             </fieldset>
-            <a href="https://square.link/u/srITjSrZ" target="_blank" rel="noopener" style="display:block;text-align:center;background:#F5C518!important;color:#000!important;border:none!important;font-weight:700;text-decoration:none;padding:16px 28px;border-radius:8px;font-size:18px;margin-top:12px;cursor:pointer;">Buy Now</a>
+            <div id="checkoutError" style="display:none;color:#ff6b6b;font-size:13px;margin-top:8px;"></div>
+            <button type="button" id="squareBuyNowBtn" onclick="mvgeCheckout()" style="display:block;width:100%;text-align:center;background:#F5C518;color:#000;border:none;font-weight:700;padding:16px 28px;border-radius:8px;font-size:18px;margin-top:12px;cursor:pointer;">
+              Buy Now — <span id="checkoutTotal">$0</span>
+            </button>
           </form>
         </div>
         <aside class="checkout-summary">
@@ -493,6 +496,117 @@
       </form>
     </div>
   </div>
+
+  <script>
+  /* ── MVGE Cart & Checkout Logic ── */
+
+  // Product catalogue (must match data-price in HTML)
+  var MVGE_PRODUCTS = {
+    'signature':  { name: 'Signature Deck · Black & Gold', price: 7 },
+    'phantom':    { name: 'Phantom Deck · Blue',           price: 7 },
+    'campus-mat': { name: 'Campus Mat',                    price: 39 },
+    'starter':    { name: 'Starter Set',                   price: 59 },
+    'pro-table':  { name: 'Pro Table Bundle',              price: 89 }
+  };
+
+  // Simple in-memory cart: { sku: qty }
+  window.mvgeCart = window.mvgeCart || {};
+
+  function mvgeCartTotal() {
+    var total = 0;
+    Object.keys(window.mvgeCart).forEach(function(sku) {
+      var p = MVGE_PRODUCTS[sku];
+      if (p) total += p.price * window.mvgeCart[sku];
+    });
+    // Gift wrap
+    var giftWrap = document.getElementById('giftWrap');
+    if (giftWrap && giftWrap.checked) total += 5;
+    return total;
+  }
+
+  function mvgeRenderSummary() {
+    var cartItems = document.getElementById('cartItems');
+    var subtotalEl = document.getElementById('subtotal');
+    var totalEl = document.getElementById('total');
+    var checkoutTotalEl = document.getElementById('checkoutTotal');
+
+    var html = '';
+    var subtotal = 0;
+    Object.keys(window.mvgeCart).forEach(function(sku) {
+      var qty = window.mvgeCart[sku];
+      var p = MVGE_PRODUCTS[sku];
+      if (!p || qty < 1) return;
+      var lineTotal = p.price * qty;
+      subtotal += lineTotal;
+      html += '<div class="cart-item-row" style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.08);font-size:14px;">'
+            + '<span>' + p.name + (qty > 1 ? ' ×' + qty : '') + '</span>'
+            + '<span>$' + lineTotal + '</span>'
+            + '</div>';
+    });
+
+    if (!html) html = '<p style="color:rgba(255,255,255,0.4);font-size:13px;padding:8px 0;">Cart is empty</p>';
+    if (cartItems) cartItems.innerHTML = html;
+
+    var giftWrap = document.getElementById('giftWrap');
+    var giftCost = (giftWrap && giftWrap.checked) ? 5 : 0;
+    var total = subtotal + giftCost;
+
+    if (subtotalEl) subtotalEl.textContent = '$' + subtotal;
+    if (totalEl) totalEl.textContent = '$' + total;
+    if (checkoutTotalEl) checkoutTotalEl.textContent = '$' + total;
+  }
+
+  // Hook Add-to-Cart buttons
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.btn-add').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var sku = this.dataset.sku;
+        if (!sku) return;
+        window.mvgeCart[sku] = (window.mvgeCart[sku] || 0) + 1;
+        mvgeRenderSummary();
+        // toast
+        var toast = document.getElementById('toast');
+        if (toast) { toast.style.display = 'block'; setTimeout(function(){ toast.style.display = 'none'; }, 1800); }
+      });
+    });
+
+    // Gift wrap change
+    var giftWrap = document.getElementById('giftWrap');
+    if (giftWrap) giftWrap.addEventListener('change', mvgeRenderSummary);
+
+    mvgeRenderSummary();
+  });
+
+  // Checkout: build Square link with cart note
+  function mvgeCheckout() {
+    var total = mvgeCartTotal();
+    if (total === 0) {
+      var err = document.getElementById('checkoutError');
+      if (err) { err.textContent = '⚠ Please add items to your cart first.'; err.style.display = 'block'; }
+      return;
+    }
+
+    // Build order note: "Sig x1, Mat x1 | $46"
+    var lines = [];
+    Object.keys(window.mvgeCart).forEach(function(sku) {
+      var qty = window.mvgeCart[sku];
+      var p = MVGE_PRODUCTS[sku];
+      if (p && qty > 0) lines.push(p.name + ' x' + qty);
+    });
+    var giftWrap = document.getElementById('giftWrap');
+    if (giftWrap && giftWrap.checked) lines.push('Gift wrap x1');
+
+    var note = lines.join(', ') + ' | Total: $' + total;
+
+    // Square Payment Link supports ?note= parameter
+    var url = 'https://square.link/u/srITjSrZ?note=' + encodeURIComponent(note);
+
+    var err = document.getElementById('checkoutError');
+    if (err) err.style.display = 'none';
+
+    window.open(url, '_blank', 'noopener');
+  }
+  </script>
 
   <script src="script.js"></script>
   <script>
