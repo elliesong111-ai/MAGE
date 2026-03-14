@@ -105,65 +105,84 @@
       object-fit: cover !important;
       display: block !important;
     }
+    /* Force mat-card to be vertical stack, image on top */
+    .mat-card {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0 !important;
+    }
+    .mat-card .product-visual.mat-visual {
+      order: 0 !important;
+      flex-shrink: 0 !important;
+      width: 100% !important;
+    }
+    .mat-card .product-info {
+      order: 1 !important;
+      width: 100% !important;
+    }
 
-    /* Mat stage sizing — ensure cards are visible */
+    /* Mat stage: reasonable height, overflow visible for card scatter */
+    .mat-stage-wrap { overflow: visible !important; }
+    .mat-stage {
+      overflow: visible !important;
+      position: relative !important;
+      max-width: 680px !important;
+      margin: 0 auto !important;
+    }
     .mat-surface {
       position: relative !important;
       width: 100% !important;
       height: 100% !important;
-      min-height: inherit !important;
-    }
-    .on-mat-action {
-      position: absolute !important;
-      inset: 0 !important;
     }
 
     /* ── Texas Hold'em card scatter animation ── */
-    .on-mat-action { position: relative; width: 100%; height: 100%; }
+    .on-mat-action { position: absolute !important; inset: 0 !important; overflow: visible !important; }
     .card-fan {
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%);
       width: 0; height: 0;
+      overflow: visible;
     }
     .fan-card {
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
-      width: 56px;
-      height: 78px;
+      width: 52px;
+      height: 72px;
       background: #1a1a1a;
-      border: 1.5px solid rgba(255,255,255,0.2);
+      border: 1.5px solid rgba(255,255,255,0.22);
       border-radius: 7px;
-      font-size: 22px;
+      font-size: 20px;
       color: #fff;
       position: absolute;
       top: 0; left: 0;
-      transform-origin: center bottom;
-      transition: transform 0.6s cubic-bezier(0.34,1.3,0.64,1);
+      margin: -36px 0 0 -26px;
+      transform-origin: center center;
+      transition: transform 0.65s cubic-bezier(0.34,1.25,0.64,1);
       will-change: transform;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.7);
+      cursor: pointer;
     }
-    /* Default fan: nice spread hand */
-    .fan-card:nth-child(1) { transform: translate(-50%,-100%) rotate(-35deg); }
-    .fan-card:nth-child(2) { transform: translate(-50%,-100%) rotate(-25deg); }
-    .fan-card:nth-child(3) { transform: translate(-50%,-100%) rotate(-15deg); }
-    .fan-card:nth-child(4) { transform: translate(-50%,-100%) rotate(-5deg);  }
-    .fan-card:nth-child(5) { transform: translate(-50%,-100%) rotate(5deg);   }
-    .fan-card:nth-child(6) { transform: translate(-50%,-100%) rotate(15deg);  }
-    .fan-card:nth-child(7) { transform: translate(-50%,-100%) rotate(25deg);  }
-    .fan-card:nth-child(8) { transform: translate(-50%,-100%) rotate(35deg);  }
+    /* Default fan: spread hand centered on mat */
+    .fan-card:nth-child(1) { transform: rotate(-35deg) translateY(-48px); }
+    .fan-card:nth-child(2) { transform: rotate(-25deg) translateY(-48px); }
+    .fan-card:nth-child(3) { transform: rotate(-15deg) translateY(-48px); }
+    .fan-card:nth-child(4) { transform: rotate(-5deg)  translateY(-48px); }
+    .fan-card:nth-child(5) { transform: rotate( 5deg)  translateY(-48px); }
+    .fan-card:nth-child(6) { transform: rotate(15deg)  translateY(-48px); }
+    .fan-card:nth-child(7) { transform: rotate(25deg)  translateY(-48px); }
+    .fan-card:nth-child(8) { transform: rotate(35deg)  translateY(-48px); }
 
-    /* Dealt out: Texas Hold'em 8-seat deal */
-    .mat-stage.deal-out .fan-card:nth-child(1) { transform: translate(calc(-50% - 42%), calc(-100% - 45%)) rotate(-10deg); }
-    .mat-stage.deal-out .fan-card:nth-child(2) { transform: translate(calc(-50% - 28%), calc(-100% - 62%)) rotate(-5deg); }
-    .mat-stage.deal-out .fan-card:nth-child(3) { transform: translate(calc(-50% - 10%), calc(-100% - 68%)) rotate(-2deg); }
-    .mat-stage.deal-out .fan-card:nth-child(4) { transform: translate(calc(-50% + 10%), calc(-100% - 68%)) rotate(2deg);  }
-    .mat-stage.deal-out .fan-card:nth-child(5) { transform: translate(calc(-50% + 28%), calc(-100% - 62%)) rotate(5deg);  }
-    .mat-stage.deal-out .fan-card:nth-child(6) { transform: translate(calc(-50% + 42%), calc(-100% - 45%)) rotate(10deg); }
-    .mat-stage.deal-out .fan-card:nth-child(7) { transform: translate(calc(-50% + 42%), calc(-100% + 20%)) rotate(8deg);  }
-    .mat-stage.deal-out .fan-card:nth-child(8) { transform: translate(calc(-50% - 42%), calc(-100% + 20%)) rotate(-8deg); }
+    /* Dealt: scatter to 8 Texas Hold'em seat positions */
+    .mat-stage.deal-out .fan-card:nth-child(1) { transform: translate(-200px, -90px)  rotate(-12deg); }
+    .mat-stage.deal-out .fan-card:nth-child(2) { transform: translate(-130px, -130px) rotate(-5deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(3) { transform: translate(-45px,  -145px) rotate(-2deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(4) { transform: translate( 45px,  -145px) rotate( 2deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(5) { transform: translate( 130px, -130px) rotate( 5deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(6) { transform: translate( 200px, -90px)  rotate(12deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(7) { transform: translate( 170px,  65px)  rotate( 8deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(8) { transform: translate(-170px,  65px)  rotate(-8deg);  }
 
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
