@@ -88,55 +88,82 @@
     }
 
     /* Hide chip ovals from external stylesheet */
-    .chip-stack, .mat-chip, .chip-oval, [class*="chip"] { display: none !important; }
+    .chip-stack, .mat-chip, .chip-oval { display: none !important; }
+
+    /* Fix mat product image display */
+    .mat-visual, .product-visual.mat-visual {
+      display: block !important;
+      width: 100% !important;
+      min-height: 200px !important;
+      aspect-ratio: 4/3 !important;
+      overflow: hidden !important;
+      border-radius: 12px !important;
+    }
+    .mat-visual img {
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+    }
+
+    /* Mat stage sizing — ensure cards are visible */
+    .mat-surface {
+      position: relative !important;
+      width: 100% !important;
+      height: 100% !important;
+      min-height: inherit !important;
+    }
+    .on-mat-action {
+      position: absolute !important;
+      inset: 0 !important;
+    }
 
     /* ── Texas Hold'em card scatter animation ── */
+    .on-mat-action { position: relative; width: 100%; height: 100%; }
     .card-fan {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-      height: 90px;
-      width: 100%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0; height: 0;
     }
     .fan-card {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 44px;
-      height: 62px;
-      background: #111;
-      border: 1.5px solid rgba(255,255,255,0.15);
-      border-radius: 6px;
-      font-size: 18px;
+      width: 56px;
+      height: 78px;
+      background: #1a1a1a;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      border-radius: 7px;
+      font-size: 22px;
       color: #fff;
       position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform-origin: bottom center;
-      transition: transform 0.55s cubic-bezier(0.34,1.4,0.64,1),
-                  opacity 0.4s ease;
+      top: 0; left: 0;
+      transform-origin: center bottom;
+      transition: transform 0.6s cubic-bezier(0.34,1.3,0.64,1);
       will-change: transform;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
     }
-    /* Default fan: stacked in center */
-    .fan-card:nth-child(1) { transform: translateX(-50%) rotate(-28deg) translateY(-4px); }
-    .fan-card:nth-child(2) { transform: translateX(-50%) rotate(-20deg) translateY(-8px); }
-    .fan-card:nth-child(3) { transform: translateX(-50%) rotate(-12deg) translateY(-10px); }
-    .fan-card:nth-child(4) { transform: translateX(-50%) rotate(-4deg)  translateY(-12px); }
-    .fan-card:nth-child(5) { transform: translateX(-50%) rotate(4deg)   translateY(-12px); }
-    .fan-card:nth-child(6) { transform: translateX(-50%) rotate(12deg)  translateY(-10px); }
-    .fan-card:nth-child(7) { transform: translateX(-50%) rotate(20deg)  translateY(-8px); }
-    .fan-card:nth-child(8) { transform: translateX(-50%) rotate(28deg)  translateY(-4px); }
+    /* Default fan: nice spread hand */
+    .fan-card:nth-child(1) { transform: translate(-50%,-100%) rotate(-35deg); }
+    .fan-card:nth-child(2) { transform: translate(-50%,-100%) rotate(-25deg); }
+    .fan-card:nth-child(3) { transform: translate(-50%,-100%) rotate(-15deg); }
+    .fan-card:nth-child(4) { transform: translate(-50%,-100%) rotate(-5deg);  }
+    .fan-card:nth-child(5) { transform: translate(-50%,-100%) rotate(5deg);   }
+    .fan-card:nth-child(6) { transform: translate(-50%,-100%) rotate(15deg);  }
+    .fan-card:nth-child(7) { transform: translate(-50%,-100%) rotate(25deg);  }
+    .fan-card:nth-child(8) { transform: translate(-50%,-100%) rotate(35deg);  }
 
-    /* Dealt out: cards fly to 7-seat Texas Hold'em positions */
-    .mat-stage.deal-out .fan-card:nth-child(1) { transform: translate(calc(-50% - 200px), -30px) rotate(-15deg); }
-    .mat-stage.deal-out .fan-card:nth-child(2) { transform: translate(calc(-50% - 140px), -80px) rotate(-8deg); }
-    .mat-stage.deal-out .fan-card:nth-child(3) { transform: translate(calc(-50% - 60px),  -100px) rotate(-3deg); }
-    .mat-stage.deal-out .fan-card:nth-child(4) { transform: translate(calc(-50% + 0px),   -110px) rotate(0deg); }
-    .mat-stage.deal-out .fan-card:nth-child(5) { transform: translate(calc(-50% + 60px),  -100px) rotate(3deg); }
-    .mat-stage.deal-out .fan-card:nth-child(6) { transform: translate(calc(-50% + 140px), -80px) rotate(8deg); }
-    .mat-stage.deal-out .fan-card:nth-child(7) { transform: translate(calc(-50% + 200px), -30px) rotate(15deg); }
-    .mat-stage.deal-out .fan-card:nth-child(8) { transform: translate(calc(-50% + 60px),  40px)  rotate(5deg); }
+    /* Dealt out: Texas Hold'em 8-seat deal */
+    .mat-stage.deal-out .fan-card:nth-child(1) { transform: translate(calc(-50% - 42%), calc(-100% - 45%)) rotate(-10deg); }
+    .mat-stage.deal-out .fan-card:nth-child(2) { transform: translate(calc(-50% - 28%), calc(-100% - 62%)) rotate(-5deg); }
+    .mat-stage.deal-out .fan-card:nth-child(3) { transform: translate(calc(-50% - 10%), calc(-100% - 68%)) rotate(-2deg); }
+    .mat-stage.deal-out .fan-card:nth-child(4) { transform: translate(calc(-50% + 10%), calc(-100% - 68%)) rotate(2deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(5) { transform: translate(calc(-50% + 28%), calc(-100% - 62%)) rotate(5deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(6) { transform: translate(calc(-50% + 42%), calc(-100% - 45%)) rotate(10deg); }
+    .mat-stage.deal-out .fan-card:nth-child(7) { transform: translate(calc(-50% + 42%), calc(-100% + 20%)) rotate(8deg);  }
+    .mat-stage.deal-out .fan-card:nth-child(8) { transform: translate(calc(-50% - 42%), calc(-100% + 20%)) rotate(-8deg); }
 
   </style>
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
