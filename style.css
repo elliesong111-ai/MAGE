@@ -1280,6 +1280,60 @@ body {
 
 /* ----- Card Magic section ----- */
 .magic-cta-wrap { margin-top: 32px; text-align: center; }
+.magic-games-wrap {
+  margin-top: 36px;
+}
+.magic-games-title {
+  margin: 0 0 8px;
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: 0.04em;
+}
+.magic-games-intro {
+  margin: 0 0 20px;
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+.magic-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+.magic-game-card {
+  background: var(--black-soft);
+  border: 1px solid var(--border-white);
+  border-radius: 12px;
+  padding: 18px 16px;
+  text-align: left;
+}
+.magic-game-icon {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 1.35rem;
+}
+.magic-game-card h4 {
+  margin: 0 0 8px;
+  color: var(--white);
+  font-size: 1rem;
+}
+.magic-game-card p {
+  margin: 0 0 12px;
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+.magic-game-card .cta {
+  width: 100%;
+  text-align: center;
+}
+.magic-game-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.magic-game-disabled:hover {
+  transform: none;
+  background: rgba(255,255,255,0.06);
+}
 .magic-section { padding-top: 2rem; padding-bottom: 3rem; }
 .magic-section .section-intro { max-width: 520px; margin-left: auto; margin-right: auto; margin-bottom: 24px; }
 
