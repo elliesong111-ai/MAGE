@@ -1710,6 +1710,77 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', openMagicModal);
   });
 
+  // Speed Shuffle mini game
+  const shuffleStartBtn = document.getElementById('shuffleStartBtn');
+  const shuffleTapBtn = document.getElementById('shuffleTapBtn');
+  const shuffleTimeEl = document.getElementById('shuffleTime');
+  const shuffleScoreEl = document.getElementById('shuffleScore');
+  const shuffleBestEl = document.getElementById('shuffleBest');
+
+  if (shuffleStartBtn && shuffleTapBtn && shuffleTimeEl && shuffleScoreEl && shuffleBestEl) {
+    const SHUFFLE_KEY = 'mvge_speed_shuffle_best';
+    const SHUFFLE_DURATION = 8;
+    let shuffleTimer = null;
+    let shuffleRemaining = SHUFFLE_DURATION;
+    let shuffleScore = 0;
+    let shuffleBest = parseInt(localStorage.getItem(SHUFFLE_KEY) || '0', 10);
+
+    function renderShuffle() {
+      shuffleTimeEl.textContent = shuffleRemaining.toFixed(1);
+      shuffleScoreEl.textContent = String(shuffleScore);
+      shuffleBestEl.textContent = String(shuffleBest);
+    }
+
+    function endShuffle() {
+      if (shuffleTimer) {
+        clearInterval(shuffleTimer);
+        shuffleTimer = null;
+      }
+
+      shuffleTapBtn.disabled = true;
+      shuffleStartBtn.disabled = false;
+      shuffleRemaining = 0;
+
+      if (shuffleScore > shuffleBest) {
+        shuffleBest = shuffleScore;
+        localStorage.setItem(SHUFFLE_KEY, String(shuffleBest));
+        showToast(`New best: ${shuffleBest}!`);
+      } else {
+        showToast(`Time! Score: ${shuffleScore}`);
+      }
+
+      renderShuffle();
+    }
+
+    shuffleStartBtn.addEventListener('click', () => {
+      if (shuffleTimer) return;
+
+      shuffleRemaining = SHUFFLE_DURATION;
+      shuffleScore = 0;
+      shuffleStartBtn.disabled = true;
+      shuffleTapBtn.disabled = false;
+      renderShuffle();
+
+      shuffleTimer = setInterval(() => {
+        shuffleRemaining = Math.max(0, shuffleRemaining - 0.1);
+        if (shuffleRemaining <= 0) {
+          endShuffle();
+          return;
+        }
+        renderShuffle();
+      }, 100);
+    });
+
+    shuffleTapBtn.addEventListener('click', () => {
+      if (shuffleTapBtn.disabled) return;
+      shuffleScore += 1;
+      renderShuffle();
+      playMagicSound('click');
+    });
+
+    renderShuffle();
+  }
+
   if (magicModalClose) {
     magicModalClose.addEventListener('click', closeMagicModal);
   }

@@ -58,13 +58,20 @@ body {
   border-bottom: 1px solid var(--border-white);
 }
 .nav-logo { display: flex; align-items: center; }
+.nav-brand {
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
 .nav-logo .logo-svg {
   height: 44px;
   width: 44px;
   display: block;
-  border-radius: 50%;
   object-fit: contain;
   transition: transform 0.3s ease;
+  border-radius: 8px;
 }
 .nav-logo:hover .logo-svg { transform: scale(1.05); }
 .footer-logo {
@@ -72,9 +79,9 @@ body {
   width: 56px;
   display: block;
   margin: 0 auto 12px;
-  border-radius: 50%;
   object-fit: contain;
   opacity: 0.95;
+  border-radius: 8px;
 }
 .nav-links {
   list-style: none;
@@ -180,18 +187,7 @@ body {
   opacity: 0;
 }
 .hero-tap-overlay::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius: 50%;
-  width: 80vmin;
-  height: 80vmin;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  animation: tapRing 2s ease-in-out infinite;
-  box-shadow: 0 0 30px rgba(255,255,255,0.1), inset 0 0 60px rgba(255,255,255,0.03);
+  content: none;
 }
 @keyframes tapRing {
   0%, 100% { transform: translate(-50%, -50%) scale(0.92); opacity: 0.6; }
@@ -217,24 +213,6 @@ body {
 .hero-tap-suit:nth-child(2) { right: 0; top: 50%; transform: translate(50%, -50%); }
 .hero-tap-suit:nth-child(3) { left: 50%; bottom: 0; transform: translate(-50%, 50%); }
 .hero-tap-suit:nth-child(4) { left: 0; top: 50%; transform: translate(-50%, -50%); }
-.hero-tap-logo {
-  position: relative;
-  z-index: 1;
-  width: clamp(180px, 35vw, 320px);
-  height: auto;
-  filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,255,255,0.5)) drop-shadow(0 0 80px rgba(255,255,255,0.3));
-  animation: tapLogoPulse 1.2s ease-in-out infinite;
-  transition: transform 0.25s ease, filter 0.25s ease;
-  margin-bottom: 20px;
-}
-@keyframes tapLogoPulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(255,255,255,0.5)); }
-  50% { transform: scale(1.04); filter: drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(255,255,255,0.7)); }
-}
-.hero-tap-overlay:hover .hero-tap-logo {
-  transform: scale(1.08);
-  filter: drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(255,255,255,0.8)) drop-shadow(0 0 100px rgba(255,255,255,0.5));
-}
 .hero-tap-text {
   position: relative;
   z-index: 1;
@@ -422,8 +400,8 @@ body {
   display: block;
   width: clamp(140px, 28vw, 220px);
   height: auto;
-  border-radius: 50%;
   animation: none;
+  border-radius: 12px;
 }
 .hero-started .hero-logo {
   animation: logoLand 0.4s ease-out 1.8s both, logoPulse 4s ease-in-out 2.5s infinite;
@@ -643,86 +621,6 @@ body {
   background: var(--white);
   color: var(--black);
 }
-
-/* Product action row: Add to Cart + Buy Now side by side */
-.product-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: auto;
-  flex-wrap: wrap;
-}
-.product-actions .btn-add {
-  margin-top: 0;
-  flex: 1;
-  min-width: 120px;
-}
-.btn-buy-now {
-  flex: 1;
-  min-width: 120px;
-  padding: 12px 20px;
-  background: #f7c948;
-  color: #111;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
-  font-size: 0.95rem;
-}
-.btn-buy-now:hover {
-  background: #ffe066;
-  transform: translateY(-2px);
-}
-
-/* Buy Now modal */
-.buy-now-product-label {
-  font-weight: 600;
-  color: var(--gold, #f7c948);
-  margin: 0 0 16px;
-}
-.buy-now-shipping-note {
-  font-size: 0.85rem;
-  color: rgba(255,255,255,0.6);
-  margin: 4px 0 12px;
-}
-#buyNowForm .label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 14px;
-  font-size: 0.9rem;
-  color: rgba(255,255,255,0.8);
-}
-#buyNowForm .label input,
-#buyNowForm .label select {
-  padding: 10px 12px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 6px;
-  color: var(--white);
-  font-size: 0.95rem;
-  outline: none;
-}
-#buyNowForm .label input:focus,
-#buyNowForm .label select:focus {
-  border-color: #f7c948;
-}
-#buyNowSubmitBtn {
-  width: 100%;
-  margin-top: 8px;
-  padding: 14px;
-  background: #f7c948;
-  color: #111;
-  border: none;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-#buyNowSubmitBtn:hover { background: #ffe066; }
-#buyNowSubmitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
-
 .bundle-card .product-info { flex: 1; }
 
 /* ----- See It In Action: mat details + on-mat action ----- */
@@ -817,8 +715,8 @@ body {
 .mat-emblem-logo {
   width: clamp(80px, 15vw, 140px);
   height: auto;
-  opacity: 0.15;
-  filter: drop-shadow(0 0 10px rgba(255,255,255,0.1));
+  opacity: 0.2;
+  border-radius: 8px;
 }
 .on-mat-action {
   position: relative;
@@ -1325,6 +1223,30 @@ body {
 .magic-game-card .cta {
   width: 100%;
   text-align: center;
+}
+.shuffle-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  margin: 0 0 12px;
+  color: var(--gray);
+  font-size: 0.85rem;
+}
+.shuffle-stats strong {
+  color: var(--white);
+  font-weight: 700;
+}
+.shuffle-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.shuffle-actions .cta {
+  padding: 10px 12px;
+}
+.shuffle-actions .cta[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .magic-game-disabled {
   opacity: 0.55;
