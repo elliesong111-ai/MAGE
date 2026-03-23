@@ -96,7 +96,7 @@ body {
   flex-direction: column;
   gap: 6px;
   background: none;
-  border: none;
+  border: 2px solid var(--white);
   color: var(--white);
   cursor: pointer;
   padding: 8px;
@@ -240,7 +240,7 @@ body {
   z-index: 1;
   font-family: var(--font-display);
   font-size: clamp(1.2rem, 3vw, 1.8rem);
-  font-weight: 700;
+  font-weight: 600;
   color: var(--white);
   letter-spacing: 0.25em;
   text-shadow: 0 0 15px #fff, 0 0 30px rgba(255,255,255,0.6), 0 0 60px rgba(255,255,255,0.3);
@@ -483,7 +483,7 @@ body {
   text-decoration: none;
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
-  border: none;
+  border: 2px solid var(--white);
   font-size: 1rem;
   font-family: var(--font-body);
 }
@@ -657,20 +657,22 @@ body {
   min-width: 120px;
 }
 .btn-buy-now {
+  display: inline-block;
+  text-align: center;
   flex: 1;
   min-width: 120px;
   padding: 12px 20px;
-  background: #f7c948;
-  color: #111;
-  border: none;
+  background: transparent;
+  color: var(--white) !important;
+  border: 2px solid var(--white);
   border-radius: 8px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s;
   font-size: 0.95rem;
 }
 .btn-buy-now:hover {
-  background: #ffe066;
+  background: rgba(255,255,255,0.08);
   transform: translateY(-2px);
 }
 
@@ -711,16 +713,16 @@ body {
   width: 100%;
   margin-top: 8px;
   padding: 14px;
-  background: #f7c948;
-  color: #111;
-  border: none;
+  background: transparent;
+  color: var(--white) !important;
+  border: 2px solid var(--white);
   border-radius: 8px;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.2s;
 }
-#buyNowSubmitBtn:hover { background: #ffe066; }
+#buyNowSubmitBtn:hover { background: rgba(255,255,255,0.08); }
 #buyNowSubmitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .bundle-card .product-info { flex: 1; }
@@ -1042,7 +1044,7 @@ body {
   padding: 0 8px;
 }
 .checkout-fieldset {
-  border: none;
+  border: 2px solid var(--white);
   margin: 0 0 28px;
   padding: 0 0 24px;
   border-bottom: 1px solid rgba(212, 175, 55, 0.2);
@@ -1208,7 +1210,7 @@ body {
   top: 12px;
   right: 12px;
   background: none;
-  border: none;
+  border: 2px solid var(--white);
   color: var(--white);
   font-size: 1.5rem;
   cursor: pointer;
@@ -1258,7 +1260,7 @@ body {
   padding: 14px;
   background: var(--white);
   color: var(--black);
-  border: none;
+  border: 2px solid var(--white);
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
@@ -1332,19 +1334,19 @@ body {
   content: "MVGE";
   font-family: var(--font-display);
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   color: rgba(255,255,255,0.4);
   letter-spacing: 0.15em;
 }
 .magic-card-front {
   background: #fff;
-  color: #111;
+  color: var(--white) !important;
   transform: rotateY(180deg);
   flex-direction: column;
   gap: 2px;
 }
 .magic-card-front.red { color: #c00; }
-.magic-value { font-size: 1.25rem; font-weight: 700; line-height: 1; }
+.magic-value { font-size: 1.25rem; font-weight: 600; line-height: 1; }
 .magic-suit { font-size: 1.5rem; line-height: 1; }
 .magic-reveal {
   text-align: center;
