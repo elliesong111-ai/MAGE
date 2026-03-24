@@ -500,6 +500,16 @@ body {
   border: 2px solid var(--white);
 }
 .cta-secondary:hover { background: rgba(255,255,255,0.08); }
+.buy-now-cta {
+  background: #f5c518;
+  color: #111 !important;
+  border-color: #f5c518;
+}
+.buy-now-cta:hover {
+  background: #ffe066;
+  border-color: #ffe066;
+  box-shadow: 0 0 16px rgba(245, 197, 24, 0.45);
+}
 .cta-ghost {
   background: rgba(255,255,255,0.06);
   color: var(--white);
@@ -662,9 +672,9 @@ body {
   flex: 1;
   min-width: 120px;
   padding: 12px 20px;
-  background: transparent;
-  color: var(--white) !important;
-  border: 2px solid var(--white);
+  background: #f5c518;
+  color: #111 !important;
+  border: 2px solid #f5c518;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
@@ -672,7 +682,9 @@ body {
   font-size: 0.95rem;
 }
 .btn-buy-now:hover {
-  background: rgba(255,255,255,0.08);
+  background: #ffe066;
+  border-color: #ffe066;
+  box-shadow: 0 0 14px rgba(245, 197, 24, 0.4);
   transform: translateY(-2px);
 }
 
