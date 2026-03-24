@@ -834,6 +834,11 @@ body {
   transform: none !important;
   visibility: visible !important;
 }
+.story * {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+}
 .story-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
