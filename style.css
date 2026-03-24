@@ -1263,7 +1263,13 @@ body {
 .magic-section .section-intro { max-width: 520px; margin-left: auto; margin-right: auto; margin-bottom: 24px; }
 
 /* ----- Card Magic modal ----- */
-.magic-modal .modal-content { width: min(96vw, 520px); padding: 32px 24px; }
+.magic-modal .modal-content {
+  width: min(96vw, 520px);
+  padding: 32px 24px;
+  max-height: 88vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 .magic-modal-content h2 { margin-bottom: 8px; }
 .magic-modal-sub { color: var(--gray); margin: 0 0 24px; font-size: 0.95rem; }
 .magic-cards {
@@ -1400,12 +1406,12 @@ body {
 .magic-columns-selectable {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 8px;
   margin: 14px 0;
 }
 .magic-column-cards {
   display: grid;
-  gap: 6px;
+  gap: 4px;
   justify-items: center;
 }
 .magic-column-select {
@@ -1430,8 +1436,8 @@ body {
   cursor: pointer;
 }
 .magic-card-new {
-  width: 62px;
-  height: 86px;
+  width: 54px;
+  height: 76px;
 }
 .magic-card-front-new {
   position: relative;
@@ -1507,6 +1513,22 @@ body {
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 10px;
+}
+
+@media (max-height: 780px) {
+  .magic-modal .modal-content {
+    padding: 20px 14px;
+    width: min(98vw, 520px);
+    max-height: 92vh;
+  }
+  .magic-columns-display,
+  .magic-columns-selectable {
+    gap: 6px;
+  }
+  .magic-card-new {
+    width: 48px;
+    height: 68px;
+  }
 }
 
 /* ----- Responsive ----- */
