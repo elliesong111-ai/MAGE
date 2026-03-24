@@ -825,6 +825,15 @@ body {
 
 /* ----- Story / Trust ----- */
 .story { background: var(--black-soft); }
+.story,
+.story .section-title,
+.story .story-content,
+.story .story-social,
+.story .testimonials {
+  opacity: 1 !important;
+  transform: none !important;
+  visibility: visible !important;
+}
 .story-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
